@@ -172,6 +172,8 @@ func (c *Container) portFwdCmd(evt *tcell.EventKey) *tcell.EventKey {
 	if path == "" {
 		return evt
 	}
+	//discovery, istio-system/istiod-112-79dd58f89-7frzh in portFwdCmd
+	log.Info().Msgf("%s, %s in portFwdCmd", path, c.GetTable().Path)
 
 	if _, ok := c.App().factory.ForwarderFor(fwFQN(c.GetTable().Path, path)); ok {
 		c.App().Flash().Err(fmt.Errorf("A port-forward already exist on container %s", c.GetTable().Path))
@@ -220,13 +222,13 @@ func (c *Container) listForwardable(path string) (port.ContainerPortSpecs, map[s
 	if err != nil {
 		return nil, nil, false
 	}
-
+	// istio-system/istiod-112-79dd58f89-7frzh in listForwardable
+	log.Info().Msgf("%s in listForwardable", c.GetTable().Path)
 	co, err := locateContainer(path, po.Spec.Containers)
 	if err != nil {
 		c.App().Flash().Err(err)
 		return nil, nil, false
 	}
-
 	if err := checkRunningStatus(path, po.Status.ContainerStatuses); err != nil {
 		c.App().Flash().Err(err)
 		return nil, nil, false

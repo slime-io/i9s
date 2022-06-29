@@ -3,11 +3,6 @@ package view
 import (
 	"context"
 	"fmt"
-	"runtime"
-	"sort"
-	"strconv"
-	"strings"
-
 	"github.com/derailed/k9s/internal/client"
 	"github.com/derailed/k9s/internal/config"
 	"github.com/derailed/k9s/internal/model"
@@ -15,6 +10,10 @@ import (
 	"github.com/derailed/k9s/internal/ui"
 	"github.com/derailed/tview"
 	"github.com/gdamore/tcell/v2"
+	"runtime"
+	"sort"
+	"strconv"
+	"strings"
 )
 
 const (

@@ -1,13 +1,15 @@
 GO_FLAGS   ?=
-NAME       := k9s
+NAME       := i9s
 OUTPUT_BIN ?= execs/${NAME}
 PACKAGE    := github.com/derailed/$(NAME)
 GIT_REV    ?= $(shell git rev-parse --short HEAD)
+BRANCH     ?= $(shell git symbolic-ref --short -q HEAD)
+TAG        ?= $(shell git tag --points-at HEAD)
 SOURCE_DATE_EPOCH ?= $(shell date +%s)
 DATE       ?= $(shell date -u -d @${SOURCE_DATE_EPOCH} +"%Y-%m-%dT%H:%M:%SZ")
-VERSION    ?= v0.25.18
-IMG_NAME   := derailed/k9s
-IMAGE      := ${IMG_NAME}:${VERSION}
+REPO       := slimeio
+IMG_NAME   := i9s
+IMAGE      := ${REPO}/${IMG_NAME}:${TAG}
 
 default: help
 
@@ -26,8 +28,11 @@ build:  ## Builds the CLI
 kubectl-stable-version:  ## Get kubectl latest stable version
 	@curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt
 
-img:    ## Build Docker Image
-	@docker build --rm -t ${IMAGE} .
+img: build    ## Build Docker Image
+	@docker build -t ${IMAGE} .
+
+push: img
+	@docker push ${IMAGE}
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":[^:]*?## "}; {printf "\033[38;5;69m%-30s\033[38;5;38m %s\033[0m\n", $$1, $$2}'

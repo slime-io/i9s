@@ -43,6 +43,7 @@ func NewK9s() *K9s {
 		Clusters:      make(map[string]*Cluster),
 		Thresholds:    NewThreshold(),
 		ScreenDumpDir: K9sDefaultScreenDumpDir,
+		Logoless:      true,
 	}
 }
 

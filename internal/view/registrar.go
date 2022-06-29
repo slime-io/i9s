@@ -91,6 +91,18 @@ func miscViewers(vv MetaViewers) {
 	vv[client.NewGVR("sanitizer")] = MetaViewer{
 		viewerFn: NewSanitizer,
 	}
+	vv[client.NewGVR("istio")] = MetaViewer{
+		viewerFn: NewIstio,
+	}
+	vv[client.NewGVR("eda")] = MetaViewer{
+		viewerFn: NewEnvoyApiView,
+	}
+	vv[client.NewGVR("ida")] = MetaViewer{
+		viewerFn: NewIstioApiView,
+	}
+	vv[client.NewGVR("ic")] = MetaViewer{
+		viewerFn: NewIstioConfigView,
+	}
 }
 
 func appsViewers(vv MetaViewers) {

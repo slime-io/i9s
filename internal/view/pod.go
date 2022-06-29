@@ -44,7 +44,6 @@ func NewPod(gvr client.GVR) ResourceViewer {
 	p.GetTable().SetEnterFn(p.showContainers)
 	p.GetTable().SetColorerFn(render.Pod{}.ColorerFunc())
 	p.GetTable().SetDecorateFn(p.portForwardIndicator)
-
 	return &p
 }
 
@@ -73,7 +72,9 @@ func (p *Pod) bindKeys(aa ui.KeyActions) {
 	if !p.App().Config.K9s.IsReadOnly() {
 		p.bindDangerousKeys(aa)
 	}
-
+   aa.Add(ui.KeyActions{
+   	    ui.KeyM: ui.NewKeyAction("Envoy Debug", p.showProxyConfig,true),
+   })
 	aa.Add(ui.KeyActions{
 		ui.KeyF:      ui.NewKeyAction("Show PortForward", p.showPFCmd, true),
 		ui.KeyShiftR: ui.NewKeyAction("Sort Ready", p.GetTable().SortColCmd(readyCol, true), false),
@@ -129,6 +130,44 @@ func (p *Pod) coContext(ctx context.Context) context.Context {
 }
 
 // Handlers...
+
+func (p *Pod) showProxyConfig(evt *tcell.EventKey) *tcell.EventKey {
+	path := p.GetTable().GetSelectedItem()
+	if path == "" {
+		return evt
+	}
+	po, err := p.App().factory.Get("v1/pods", p.GetTable().GetSelectedItem(), true, labels.Everything())
+	if err != nil {
+		log.Error().Msgf("get pods %s err, %s", p.GetTable().GetSelectedItem(), err.Error())
+		return evt
+	}
+	pod := v1.Pod{}
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(po.(*unstructured.Unstructured).Object, &pod)
+	if err != nil {
+		log.Error().Msgf("Unstructured convert to configmap err, %s", err.Error())
+		return evt
+	}
+	has := false
+	for _, co := range pod.Status.ContainerStatuses {
+		if co.Name == "istio-proxy" {
+			has = true
+			break
+		}
+	}
+	if ! has {
+		log.Debug().Msgf("pod %s has no istio-proxy, skip", p.GetTable().GetSelectedItem())
+		return evt
+	}
+
+	log.Info().Msgf("get path %s in showProxyConfig", path)
+	eda := NewEnvoyApiView(client.NewGVR("eda"))
+	eda.SetContextFn(p.coContext)
+	if err := p.App().inject(eda); err != nil {
+		p.App().Flash().Err(err)
+		return evt
+	}
+	return nil
+}
 
 func (p *Pod) showPFCmd(evt *tcell.EventKey) *tcell.EventKey {
 	path := p.GetTable().GetSelectedItem()

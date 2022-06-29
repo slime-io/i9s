@@ -17,6 +17,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	istioRev = "istio.io/rev"
+)
+
 func parsePFAnn(s string) (string, string, bool) {
 	tokens := strings.Split(s, ":")
 	if len(tokens) != 2 {
