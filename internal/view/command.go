@@ -230,7 +230,6 @@ func (c *Command) componentFor(gvr, path string, v *MetaViewer) ResourceViewer {
 	} else {
 		view = NewBrowser(client.NewGVR(gvr))
 	}
-
 	view.SetInstance(path)
 	if v.enterFn != nil {
 		view.GetTable().SetEnterFn(v.enterFn)

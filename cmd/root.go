@@ -181,7 +181,7 @@ func initK9sFlags() {
 	rootCmd.Flags().BoolVar(
 		k9sFlags.Logoless,
 		"logoless",
-		false,
+		true,
 		"Turn K9s logo off",
 	)
 	rootCmd.Flags().BoolVar(
@@ -265,7 +265,7 @@ func initK8sFlags() {
 		k8sFlags.Namespace,
 		"namespace",
 		"n",
-		"",
+		"default",
 		"If present, the namespace scope for this CLI request",
 	)
 

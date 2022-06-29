@@ -109,9 +109,9 @@ func execute(opts shellOpts) error {
 	go func(cancel context.CancelFunc) {
 		defer log.Debug().Msgf("SIGNAL_GOR - BAILED!!")
 		select {
-		case <-sigChan:
-			log.Debug().Msgf("Command canceled with signal!")
-			cancel()
+		//case <-sigChan:
+		//	log.Debug().Msgf("Command canceled with signal!")
+		//	//cancel()
 		case <-ctx.Done():
 			log.Debug().Msgf("SIGNAL Context CANCELED!")
 		}

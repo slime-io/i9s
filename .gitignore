@@ -3,12 +3,11 @@
 .idea
 .envrc
 cov.out
-execs
 k9s
 /k8s
+/execs
 dist
 notes
-vendor
 go.mod1
 go.mod2
 gen.sh

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"runtime"
 
 	"github.com/derailed/k9s/cmd"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -26,5 +27,6 @@ func init() {
 }
 
 func main() {
+	runtime.GOMAXPROCS(2)
 	cmd.Execute()
 }

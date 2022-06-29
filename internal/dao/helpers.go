@@ -81,3 +81,8 @@ func ToYAML(o runtime.Object, showManaged bool) (string, error) {
 
 	return buff.String(), nil
 }
+
+// FwFQN returns a fully qualified ns/name:container id.
+func fwFQN(po, co string) string {
+	return po + "|" + co
+}

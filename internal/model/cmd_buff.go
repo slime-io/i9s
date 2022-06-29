@@ -14,7 +14,7 @@ const (
 	// CommandBuffer represents a command buffer.
 	CommandBuffer BufferKind = 1 << iota
 	// FilterBuffer represents a filter buffer.
-	FilterBuffer
+	FilterBuffer = 100
 )
 
 type (
