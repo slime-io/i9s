@@ -75,10 +75,15 @@
 
 前提：需要指定`kubeconfig`, 且目前以适配1.12为主, 由于不同版本接口不同，可能导致查询其他版本的接口时出现问题。
 
-镜像方式(需要将kubeconfig文件挂载进容器内)
+- 镜像方式(需要将kubeconfig文件挂载进容器内)
 
 ```
 docker run -it --net=host -v $HOME/.kube/config:/root/.kube/config slimeio/i9s:v0.0.1
+```
+
+- 二进制方式, 该安装脚本会检查本地是否有`kubectl`, 如果没有需用户自行安装。之后会检查jq less 等命令是否存在，如果不存在会自动安装, 之后会运行镜像，并将镜像中的 i9s istioctl 可执行文件移动至 /usr/bin 目录下
+```
+sh ./install.sh
 ```
 
 由于有些`minikube` 权限问题，可能需要将`kubeconifg`中指定的`client-key`的目录一同挂进容器
