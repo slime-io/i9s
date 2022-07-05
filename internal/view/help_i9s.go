@@ -204,6 +204,11 @@ func execCmd(i ResourceViewer, path, localPort, ProxyID string){
 }
 
 func buildCmd(path, nodePort, proxyID string) string {
+	if path == "metrics" {
+		cmd:= fmt.Sprintf("curl localhost:%s/%s | less", nodePort, path)
+		return cmd
+	}
+
 	url := fmt.Sprintf("curl localhost:%s/debug/%s", nodePort, path)
 	if proxyID != "" {
 		proxy := fmt.Sprintf("?proxyID=%s", proxyID)
@@ -228,7 +233,7 @@ func availablePort(localAddr string) (int, error) {
 }
 
 func needPodSelected(path string) bool {
-	if path == "adsz" || path == "connections" || path == "instancesz" || path == "syncz" || path == "edsz" || path == "sidecarz" || path == "config_dump"{
+	if path == "adsz" || path == "connections" || path == "instancesz" || path == "syncz" || path == "edsz" || path == "sidecarz" || path == "config_dump" || path == "metrics"{
 		return true
 	}
 	return false

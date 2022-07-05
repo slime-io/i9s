@@ -36,6 +36,7 @@ func (i IstioApi) List(ctx context.Context, ns string) ([]runtime.Object, error)
 		"istio/edsz",
 		"istio/sidecarz",
 		"istio/config_dump",
+		"istio/metrics",
 	}
 	parent, ok := ctx.Value("parent").(string)
 	if !ok {
