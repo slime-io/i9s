@@ -11,7 +11,7 @@ import (
 
 const (
 	container     = "discovery"
-	containerPort = "8080"
+	containerPort = "15014"
 )
 
 type IstioApiView struct {
