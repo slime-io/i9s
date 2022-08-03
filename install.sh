@@ -4,8 +4,8 @@ set -e
 export KUBECONFIG=${KUBECONFIG:-"$HOME/.kube/config"}
 
 run() {
-  echo "docker run -it -d --net=host -v $KUBECONFIG:/root/.kube/config slimeio/i9s:v0.0.1"
-  containerID=$(docker run -it -d --net=host -v $KUBECONFIG:/root/.kube/config slimeio/i9s:v0.0.1)
+  echo "docker run -it -d --net=host -v $KUBECONFIG:/root/.kube/config slimeio/i9s:v0.0.2"
+  containerID=$(docker run -it -d --net=host -v $KUBECONFIG:/root/.kube/config slimeio/i9s:v0.0.2)
   echo "$containerID"
   docker cp $containerID:/bin/i9s /tmp/i9s/
   docker cp $containerID:/bin/istioctl /tmp/i9s/
