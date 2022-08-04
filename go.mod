@@ -43,4 +43,6 @@ require (
 require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.9
+	github.com/prometheus/client_model v0.2.0
+	github.com/prometheus/prom2json v1.3.1
 )
