@@ -25,7 +25,7 @@ func (i IstioPilot) List(ctx context.Context, ns string) ([]runtime.Object, erro
 		log.Error().Msgf("Expecting a string but got %T", ctx.Value("parent"))
 		return oo, nil
 	}
-	log.Info().Msgf("get parent %s in dao istio_pilot", parent)
+	// log.Info().Msgf("get parent %s in dao istio_pilot", parent)
 	rev, api := parse(parent)
 	instances, err := i.pilotInstance(rev)
 	if err != nil {

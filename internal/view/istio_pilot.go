@@ -82,6 +82,13 @@ func (i *IstioPodView) enter(app *App, model ui.Tabular, gvr, path string) {
 		if err := i.App().inject(proxyView); err != nil {
 			i.App().Flash().Err(err)
 		}
+	} else if api == "xds_push_stats" {
+		// new xds_push_stats view
+		xpsView := NewIstioXdsPushStatsView(client.NewGVR("xps"))
+		xpsView.SetContextFn(i.chartContext)
+		if err := i.App().inject(xpsView); err != nil {
+			i.App().Flash().Err(err)
+		}
 	} else {
 		execi9sCmd(i, api, instance, rev, "")
 	}

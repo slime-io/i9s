@@ -335,6 +335,13 @@ func loadK9s(m ResourceMetas) {
 		Verbs:        []string{},
 		Categories:   []string{"k9s"},
 	}
+	m[client.NewGVR("xps")] = metav1.APIResource{
+		Name:         "xps",
+		Kind:         "xps",
+		SingularName: "xps",
+		Verbs:        []string{},
+		Categories:   []string{"k9s"},
+	}
 }
 
 func loadHelm(m ResourceMetas) {

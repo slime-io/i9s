@@ -42,6 +42,10 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.IstioProxyID{},
 		Renderer: &render.IstioProxyID{},
 	},
+	"xps": {
+		DAO:      &dao.IstioXdsPushStats{},
+		Renderer: &render.IstioXdsPushStats{},
+	},
 	"pulses": {
 		DAO: &dao.Pulse{},
 	},

@@ -22,6 +22,11 @@ import (
 )
 // i9s help
 
+var (
+	apisNeedPodSelect = []string{"adsz", "connections", "instancesz", "syncz", "edsz", "sidecarz", "config_dump", "metrics", "xds_push_stats"}
+	apisNeedProxyID = []string{"edsz", "sidecarz", "config_dump"}
+)
+
 func execi9sCmd(i ResourceViewer, path, podName, rev, ProxyID string){
 
 	// if podName is "", choose first one in rev
@@ -105,7 +110,7 @@ func execHttp(path, localPort string)  []string {
 		log.Error().Msgf("get err in readall %s", err)
 		return ids
 	}
-	log.Info().Msgf("get info from pilot connection %s", string(b))
+	log.Debug().Msgf("get info from pilot connection %s", string(b))
 	clients :=  &Clients{}
 	err = json.Unmarshal(b, clients)
 	if err != nil {
@@ -233,15 +238,19 @@ func availablePort(localAddr string) (int, error) {
 }
 
 func needPodSelected(path string) bool {
-	if path == "adsz" || path == "connections" || path == "instancesz" || path == "syncz" || path == "edsz" || path == "sidecarz" || path == "config_dump" || path == "metrics"{
-		return true
+	for _, item := range apisNeedPodSelect {
+		if item == path {
+			return true
+		}
 	}
 	return false
 }
 
 func needProxyID(path string) bool {
-	if path == "edsz" || path == "sidecarz" || path == "config_dump" {
-		return true
+	for _, item := range apisNeedProxyID {
+		if item == path {
+			return true
+		}
 	}
 	return false
 }
