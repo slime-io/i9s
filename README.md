@@ -77,8 +77,11 @@
 
 - 镜像方式(需要将kubeconfig文件挂载进容器内)
 
+运行最新版本i9s
 ```
-docker run -it --net=host -v $HOME/.kube/config:/root/.kube/config slimeio/i9s:v0.0.2
+tag=$(curl https://api.github.com/repos/slime-io/i9s/releases/latest -s|grep tag_name|sed 's/.*tag_name": "//g; s/",.*//g')
+
+docker run -it --net=host -v $HOME/.kube/config:/root/.kube/config slimeio/i9s:$tag
 ```
 
 - 二进制方式, 该安装脚本会检查本地是否有`kubectl`, 如果没有需用户自行安装。之后会检查jq less 等命令是否存在，如果不存在会自动安装, 之后会运行镜像，并将镜像中的 i9s istioctl 可执行文件移动至 /usr/bin 目录下
