@@ -25,10 +25,10 @@ import (
 var (
 	apisNeedPodSelect = []string{"adsz", "connections", "instancesz", "syncz", "edsz", "sidecarz", "config_dump", "metrics", "xds_push_stats"}
 	apisNeedProxyID = []string{"edsz", "sidecarz", "config_dump"}
+	apisNeedNNK = []string{"configzEx"}
 )
 
 func execi9sCmd(i ResourceViewer, path, podName, rev, ProxyID string){
-
 	// if podName is "", choose first one in rev
 	if podName == "" {
 		podName = getPod(i, rev, "")
@@ -59,7 +59,7 @@ func execi9sCmd(i ResourceViewer, path, podName, rev, ProxyID string){
 		return
 	}
 	defer i.App().factory.DeleteForwarder(dao.PortForwardID(fmt.Sprintf("%s|%s", podName, container), container, fmt.Sprintf("%s:%s", nodePort, containerPort)))
-	<- time.After(100*time.Millisecond)
+	<- time.After(200*time.Millisecond)
 
 	// exec cmd
 	execCmd(i, path, nodePort, ProxyID)
@@ -209,8 +209,9 @@ func execCmd(i ResourceViewer, path, localPort, ProxyID string){
 }
 
 func buildCmd(path, nodePort, proxyID string) string {
+
 	if path == "metrics" {
-		cmd:= fmt.Sprintf("curl localhost:%s/%s | less", nodePort, path)
+		cmd:= fmt.Sprintf("curl localhost:%s/%s -s | less", nodePort, path)
 		return cmd
 	}
 
@@ -219,7 +220,7 @@ func buildCmd(path, nodePort, proxyID string) string {
 		proxy := fmt.Sprintf("?proxyID=%s", proxyID)
 		url = url + proxy
 	}
-	cmd := url + " | jq . | less"
+	cmd := url + " -s | jq . | less"
 	log.Info().Msgf("build cmd %s", cmd)
 	return cmd
 }
@@ -254,6 +255,16 @@ func needProxyID(path string) bool {
 	}
 	return false
 }
+
+func needNNK(path string) bool {
+	for _, item := range apisNeedNNK {
+		if item == path {
+			return true
+		}
+	}
+	return false
+}
+
 
 // istio/config_dump
 func formatIstioAPI(api string) (string, error) {

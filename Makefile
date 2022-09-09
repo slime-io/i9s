@@ -10,6 +10,7 @@ DATE       ?= $(shell date -u -d @${SOURCE_DATE_EPOCH} +"%Y-%m-%dT%H:%M:%SZ")
 REPO       := slimeio
 IMG_NAME   := i9s
 IMAGE      := ${REPO}/${IMG_NAME}:${TAG}
+FX_ARCH    ?= amd64
 
 default: help
 
@@ -29,7 +30,7 @@ kubectl-stable-version:  ## Get kubectl latest stable version
 	@curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt
 
 img: build    ## Build Docker Image
-	@docker build -t ${IMAGE} .
+	@docker build --build-arg FX_ARCH="${FX_ARCH}" -t ${IMAGE} .
 
 push: img
 	@docker push ${IMAGE}

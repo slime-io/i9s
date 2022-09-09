@@ -21,6 +21,9 @@ func init() {
 	if err := flag.Set("stderrthreshold", "fatal"); err != nil {
 		panic(err)
 	}
+	if err := flag.Set("one_output", "true"); err != nil {
+		panic(err)
+	}
 	if err := flag.Set("v", "0"); err != nil {
 		panic(err)
 	}

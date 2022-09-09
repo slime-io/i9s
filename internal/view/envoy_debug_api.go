@@ -7,9 +7,10 @@ import (
 	"github.com/derailed/k9s/internal/render"
 	"github.com/derailed/k9s/internal/ui"
 	"github.com/gdamore/tcell/v2"
-	"github.com/rs/zerolog/log"
 	"strings"
 )
+
+var usefx = true
 
 type EnvoyApiView struct {
 	ResourceViewer
@@ -23,8 +24,20 @@ func NewEnvoyApiView(gvr client.GVR) ResourceViewer {
 	c.GetTable().SetBorderFocusColor(tcell.ColorMediumSpringGreen)
 	c.GetTable().SetSelectedStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorMediumSpringGreen).Attributes(tcell.AttrNone))
 	c.SetContextFn(c.chartContext)
+	c.AddBindKeysFn(c.bindKeys)
 	c.GetTable().SetEnterFn(c.execCmd)
 	return &c
+}
+
+func (i *EnvoyApiView) bindKeys(aa ui.KeyActions) {
+	aa.Add(ui.KeyActions{
+		ui.KeyP: ui.NewKeyAction("switch to fx/less", i.switchon, true),
+	})
+}
+
+func (i *EnvoyApiView) switchon(evt *tcell.EventKey) *tcell.EventKey {
+	usefx = !usefx
+	return nil
 }
 
 func (c *EnvoyApiView) chartContext(ctx context.Context) context.Context {
@@ -56,7 +69,11 @@ func buildIstiocltCmd(key, name, namespace string) string {
 	if cmd == "config_dump" {
 		cmd = "all"
 	}
-	str := fmt.Sprintf("istioctl proxy-config %s %s.%s -ojson | less", cmd, name, namespace)
-	log.Info().Msg(str)
+	str := fmt.Sprintf("istioctl proxy-config %s %s.%s -ojson", cmd, name, namespace)
+	if usefx {
+		str = str + " | fx"
+	} else {
+		str = str + " | less"
+	}
 	return str
 }

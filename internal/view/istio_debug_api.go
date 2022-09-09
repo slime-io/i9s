@@ -49,7 +49,14 @@ func (i *IstioApiView) enter(app *App, model ui.Tabular, gvr, path string) {
 	}
 
 	// need choose one pilot instance
-	if needPodSelected(api) {
+	if needNNK(api) {
+		configzView := NewIstioConfigzView(client.NewGVR("configz"))
+		configzView.SetContextFn(i.chartContext)
+		if err := i.App().inject(configzView); err != nil {
+			i.App().Flash().Err(err)
+			return
+		}
+	} else if needPodSelected(api) {
 		pilotview := NewIstioPodView(client.NewGVR("pilot"))
 		pilotview.SetContextFn(i.chartContext)
 		if err := i.App().inject(pilotview); err != nil {

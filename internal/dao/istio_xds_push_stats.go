@@ -97,7 +97,7 @@ func parseMetrics(content string) map[string]string {
 
 func fetchMetric(name, namespace string) string {
 
-	str := fmt.Sprintf("kubectl exec %s -n %s -- curl localhost:15014/metrics", name, namespace)
+	str := fmt.Sprintf("kubectl exec %s -n %s -- curl localhost:15014/metrics -s", name, namespace)
 	log.Debug().Msgf("exec %s", str)
 	out, err := exec.Command("sh", []string{"-c", str}...).Output()
 	if err != nil {

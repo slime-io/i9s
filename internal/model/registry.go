@@ -18,34 +18,6 @@ var Registry = map[string]ResourceMeta{
 		DAO:      &dao.Dir{},
 		Renderer: &render.Dir{},
 	},
-	"istio": {
-		DAO:      &dao.Istio{},
-		Renderer: &render.Istio{},
-	},
-	"eda": {
-		DAO:      &dao.EnvoyApi{},
-		Renderer: &render.EnvoyApi{},
-	},
-	"ic":{
-		DAO: &dao.IstioConfig{},
-		Renderer: &render.IstioConfig{},
-	},
-	"ida": {
-		DAO:      &dao.IstioApi{},
-		Renderer: &render.IstioApi{},
-	},
-	"pilot": {
-		DAO:      &dao.IstioPilot{},
-		Renderer: &render.IstioPilot{},
-	},
-	"proxyID": {
-		DAO:      &dao.IstioProxyID{},
-		Renderer: &render.IstioProxyID{},
-	},
-	"xps": {
-		DAO:      &dao.IstioXdsPushStats{},
-		Renderer: &render.IstioXdsPushStats{},
-	},
 	"pulses": {
 		DAO: &dao.Pulse{},
 	},
