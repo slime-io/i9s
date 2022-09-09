@@ -34,7 +34,7 @@ func NewIstioPodView(gvr client.GVR) ResourceViewer {
 }
 
 func (i *IstioPodView) chartContext(ctx context.Context) context.Context {
-	log.Debug().Msgf("GetSelectedItem %s in IstioApiView.chartContext", i.GetTable().GetSelectedItem())
+	//log.Debug().Msgf("GetSelectedItem %s in IstioApiView.chartContext", i.GetTable().GetSelectedItem())
 
 	rev, api, instance, err := parseIstioPodView(i.GetTable().GetSelectedItem())
 	if err != nil {

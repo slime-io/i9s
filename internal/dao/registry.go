@@ -99,7 +99,6 @@ func AccessorFor(f Factory, gvr client.GVR) (Accessor, error) {
 		client.NewGVR("helm"):      &Helm{},
 		client.NewGVR("dir"):       &Dir{},
 		client.NewGVR("istio"):     &Istio{},
-		//client.NewGVR("eda"): &EnvoyApi{},
 	}
 
 	r, ok := m[gvr]
@@ -196,6 +195,7 @@ func (m *Meta) LoadResources(f Factory) error {
 // BOZO!! Need countermeasures for direct commands!
 func loadNonResource(m ResourceMetas) {
 	loadK9s(m)
+	loadi9s(m)
 	loadRBAC(m)
 	loadHelm(m)
 	// BOZO!! Revamp with latest...
@@ -290,55 +290,6 @@ func loadK9s(m ResourceMetas) {
 		Name:         "containers",
 		Kind:         "Containers",
 		SingularName: "container",
-		Verbs:        []string{},
-		Categories:   []string{"k9s"},
-	}
-	m[client.NewGVR("istio")] = metav1.APIResource{
-		Name:         "istio",
-		Kind:         "Istio",
-		SingularName: "istio",
-		Verbs:        []string{},
-		Categories:   []string{"k9s"},
-	}
-	m[client.NewGVR("eda")] = metav1.APIResource{
-		Name:         "eda",
-		Kind:         "eda",
-		SingularName: "eda",
-		Verbs:        []string{},
-		Categories:   []string{"k9s"},
-	}
-	m[client.NewGVR("ida")] = metav1.APIResource{
-		Name:         "ida",
-		Kind:         "ida",
-		SingularName: "ida",
-		Verbs:        []string{},
-		Categories:   []string{"k9s"},
-	}
-	m[client.NewGVR("ic")] = metav1.APIResource{
-		Name:         "ic",
-		Kind:         "ic",
-		SingularName: "ic",
-		Verbs:        []string{},
-		Categories:   []string{"k9s"},
-	}
-	m[client.NewGVR("pilot")] = metav1.APIResource{
-		Name:         "pilot",
-		Kind:         "pilot",
-		SingularName: "pilot",
-		Verbs:        []string{},
-		Categories:   []string{"k9s"},
-	}
-	m[client.NewGVR("proxyID")] = metav1.APIResource{
-		Name:         "proxyID",
-		Kind:         "proxyID",
-		SingularName: "proxyID",
-		Verbs:        []string{},
-		Categories:   []string{"k9s"},
-	}
-	m[client.NewGVR("xps")] = metav1.APIResource{
-		Name:         "xps",
-		Kind:         "xps",
-		SingularName: "xps",
 		Verbs:        []string{},
 		Categories:   []string{"k9s"},
 	}

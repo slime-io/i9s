@@ -31,7 +31,7 @@ func (i IstioProxyID) List(ctx context.Context, ns string) ([]runtime.Object, er
 		log.Error().Msgf("Expecting a string but got %T", ctx.Value("parent"))
 		return oo, nil
 	}
-	log.Info().Msgf("get parent %s in dao IstioProxyID", parent)
+	//log.Info().Msgf("get parent %s in dao IstioProxyID", parent)
 	m := new(pilot2poryx)
 	err := json.Unmarshal([]byte(parent), &m)
 	if err != nil {
