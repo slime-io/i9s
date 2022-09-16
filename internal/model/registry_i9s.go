@@ -38,4 +38,8 @@ func init() {
 		DAO:          &dao.IstioConfigz{},
 		Renderer:     &render.IstioConfigz{},
 	}
+	Registry["adsz"] = ResourceMeta{
+		DAO:          &dao.IstioAdsz{},
+		Renderer:     &render.IstioAdsz{},
+	}
 }
