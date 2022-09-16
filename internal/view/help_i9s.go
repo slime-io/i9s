@@ -25,7 +25,7 @@ import (
 var (
 	apisNeedPodSelect = []string{"adsz", "connections", "instancesz", "syncz", "edsz", "sidecarz", "config_dump", "metrics", "xds_push_stats"}
 	apisNeedProxyID = []string{"edsz", "sidecarz", "config_dump"}
-	apisNeedNNK = []string{"configzEx"}
+	exApis = []string{"configzEx", "adszEx"}
 )
 
 func execi9sCmd(i ResourceViewer, path, podName, rev, ProxyID string){
@@ -256,15 +256,14 @@ func needProxyID(path string) bool {
 	return false
 }
 
-func needNNK(path string) bool {
-	for _, item := range apisNeedNNK {
+func needEx(path string) bool {
+	for _, item := range exApis {
 		if item == path {
 			return true
 		}
 	}
 	return false
 }
-
 
 // istio/config_dump
 func formatIstioAPI(api string) (string, error) {
