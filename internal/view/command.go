@@ -151,7 +151,7 @@ func (c *Command) defaultCmd() error {
 	}
 	view := c.app.Config.ActiveView()
 	if view == "" {
-		return c.run("pod", "", true)
+		return c.run("istio", "", true)
 	}
 	tokens := strings.Split(view, " ")
 	cmd := view
@@ -247,7 +247,7 @@ func (c *Command) exec(cmd, gvr string, comp model.Component, clearStack bool) (
 
 			hh := c.app.cmdHistory.List()
 			if len(hh) == 0 {
-				_ = c.run("pod", "", true)
+				_ = c.run("istio", "", true)
 			} else {
 				_ = c.run(hh[0], "", true)
 			}
