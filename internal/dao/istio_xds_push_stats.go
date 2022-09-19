@@ -53,8 +53,8 @@ func (i IstioXdsPushStats) List(ctx context.Context, ns string) ([]runtime.Objec
 		pre = metrics
 	} else {
 		for k, v := range metrics {
-			newVal, _ := strconv.Atoi(v)
-			oldVal, _ := strconv.Atoi(pre[k])
+			newVal := toNum(v)
+			oldVal := toNum(pre[k])
 			res[k] =  strconv.Itoa(newVal-oldVal)
 		}
 		pre = metrics
@@ -107,3 +107,15 @@ func fetchMetric(name, namespace string) string {
 	return string(out)
 }
 
+func toNum(s string) int {
+
+	var num1 float64
+	fmt.Sscanf(s, "%e", &num1)
+	num2 := fmt.Sprintf("%.f", num1)
+
+	num, err := strconv.Atoi(num2)
+	if err != nil {
+		return 0
+	}
+	return num
+}

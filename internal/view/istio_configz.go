@@ -13,6 +13,7 @@ import (
 	"github.com/yudai/gojsondiff/formatter"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"os/exec"
 	"strings"
 	"time"
@@ -92,8 +93,14 @@ func (i * IstioConfigzView) diff(evt *tcell.EventKey) *tcell.EventKey {
 		return evt
 	}
 
-	// marshal to json
-	configInKubernetst, err:= json.MarshalIndent(o.(*unstructured.Unstructured).Object, "", "  ")
+	// convert k8s config to configZ
+	c := Configz{}
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(o.(*unstructured.Unstructured).Object, &c)
+	if err != nil {
+		log.Error().Msgf("convert runtime object to istio config err", err.Error())
+		return evt
+	}
+	configInKubernetst, err:= json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		log.Error().Msgf("marshal runtime object to json err", err)
 		return evt
@@ -166,7 +173,7 @@ func (i * IstioConfigzView) watch(evt *tcell.EventKey) *tcell.EventKey {
 						continue
 					}
 					if changed {
-						prefix = fmt.Sprintf("## config has changed in last flush, time: %s\n", time.Now().Format("2006-01-02 15:04:05.999999999"))
+						prefix = fmt.Sprintf("## config has changed in last flush, time: %s\n", time.Now().Format(time.RFC3339))
 						buf = []byte(prefix)
 						buf = append(buf, b...)
 						details.Update(string(buf))
@@ -224,8 +231,8 @@ type MetaData struct {
 	Labels interface{} `json:"labels"`
 	Annotations interface{} `json:"annotations"`
 	ResourceVersion string `json:"resourceVersion"`
-	CreationTimestamp string `json:"creationTimestamp"`
-
+	CreationTimestamp string `json:"creationTimestamp,"`
+	Generation int64 `json:"generation,omitempty"`
 }
 
 func getConfigz(namespace, name string) string {
@@ -285,3 +292,5 @@ func jsonDiff(s1, s2 []byte) (string, bool, error){
 	b, err := formatter.Format(diff)
 	return b, diff.Modified(), err
 }
+
+// istio config
