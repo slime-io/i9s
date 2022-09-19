@@ -1,6 +1,6 @@
 package config
 
-const defaultView = "po"
+const defaultView = "istio"
 
 // View tracks view configuration options.
 type View struct {
