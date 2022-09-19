@@ -58,10 +58,17 @@ func execi9sCmd(i ResourceViewer, path, podName, rev, ProxyID string){
 		log.Error().Msgf("get error in RunPortForward, %s", err)
 		return
 	}
-	defer i.App().factory.DeleteForwarder(dao.PortForwardID(fmt.Sprintf("%s|%s", podName, container), container, fmt.Sprintf("%s:%s", nodePort, containerPort)))
+
+	id := dao.PortForwardID(fmt.Sprintf("%s|%s", podName, container), container, fmt.Sprintf("%s:%s", nodePort, containerPort))
+	defer i.App().factory.DeleteForwarder(id)
+
 	<- time.After(200*time.Millisecond)
 
 	// exec cmd
+	_, err = net.Dial("tcp", fmt.Sprintf("localhost:%s", nodePort))
+	if err != nil {
+		<- time.After(400*time.Millisecond)
+	}
 	execCmd(i, path, nodePort, ProxyID)
 }
 

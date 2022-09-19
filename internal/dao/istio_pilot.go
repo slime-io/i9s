@@ -41,7 +41,7 @@ func (i IstioPilot) List(ctx context.Context, ns string) ([]runtime.Object, erro
 func (i *IstioPilot) pilotInstance(rev string) ([]string, error) {
 	var ins []string
 	label := map[string]string{istioRev: rev, "app": "istiod"}
-	oo, err := i.Factory.List("v1/pods", "", false, labels.Set(label).AsSelector())
+	oo, err := i.Factory.List("v1/pods", "", true, labels.Set(label).AsSelector())
 	if err != nil {
 		return nil, err
 	}

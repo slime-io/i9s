@@ -31,7 +31,7 @@ func NewIstioApiView(gvr client.GVR) ResourceViewer {
 
 func (i *IstioApiView) chartContext(ctx context.Context) context.Context {
 	// 112#istio/config_dump
-	log.Info().Msgf("GetSelectedItem %s in IstioApiView.chartContext", i.GetTable().GetSelectedItem())
+	//log.Info().Msgf("GetSelectedItem %s in IstioApiView.chartContext", i.GetTable().GetSelectedItem())
 	return context.WithValue(ctx, "parent", i.GetTable().GetSelectedItem())
 }
 
