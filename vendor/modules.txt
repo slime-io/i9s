@@ -365,6 +365,7 @@ github.com/mattn/go-isatty
 ## explicit
 github.com/mattn/go-runewidth
 # github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369
+## explicit
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/mitchellh/copystructure v1.1.1
 github.com/mitchellh/copystructure
@@ -416,6 +417,7 @@ github.com/prometheus/client_golang/prometheus/push
 ## explicit
 github.com/prometheus/client_model/go
 # github.com/prometheus/common v0.33.0
+## explicit
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 github.com/prometheus/common/model
@@ -445,6 +447,8 @@ github.com/russross/blackfriday
 # github.com/sahilm/fuzzy v0.1.0
 ## explicit
 github.com/sahilm/fuzzy
+# github.com/sergi/go-diff v1.1.0
+github.com/sergi/go-diff/diffmatchpatch
 # github.com/shopspring/decimal v1.2.0
 github.com/shopspring/decimal
 # github.com/sirupsen/logrus v1.8.1
@@ -468,6 +472,15 @@ github.com/xeipuuv/gojsonreference
 github.com/xeipuuv/gojsonschema
 # github.com/xlab/treeprint v0.0.0-20181112141820-a009c3971eca
 github.com/xlab/treeprint
+# github.com/yudai/gojsondiff v1.0.0
+## explicit
+github.com/yudai/gojsondiff
+github.com/yudai/gojsondiff/formatter
+# github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82
+## explicit
+github.com/yudai/golcs
+# github.com/yudai/pp v2.0.1+incompatible
+## explicit
 # go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5
 go.starlark.net/internal/compile
 go.starlark.net/internal/spell

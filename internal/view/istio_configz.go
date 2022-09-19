@@ -9,8 +9,11 @@ import (
 	"github.com/derailed/k9s/internal/ui"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rs/zerolog/log"
+	"github.com/yudai/gojsondiff"
+	"github.com/yudai/gojsondiff/formatter"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"os/exec"
-	"reflect"
 	"strings"
 	"time"
 )
@@ -53,7 +56,80 @@ func (i *IstioConfigzView) enter(app *App, model ui.Tabular, gvr, path string) {
 }
 
 func (i *IstioConfigzView) bindKeys(aa ui.KeyActions) {
-	aa.Add(ui.KeyActions{ui.KeyW: ui.NewKeyAction("watch", i.watch, true),})
+	aa.Add(ui.KeyActions{ui.KeyW: ui.NewKeyAction("watch", i.watch, true)})
+	aa.Add(ui.KeyActions{ui.KeyD: ui.NewKeyAction("diff", i.diff, true)})
+}
+
+func (i * IstioConfigzView) diff(evt *tcell.EventKey) *tcell.EventKey {
+
+	path := i.GetTable().GetSelectedItem()
+	if path == "" {
+		return evt
+	}
+	// get config in configz
+	kind, namespace, name, podnamespace, podname, err := parseNNK(path)
+	if err != nil {
+		log.Error().Msgf("get err in IstioConfigzView parseNNK %s", err)
+		return evt
+	}
+	configInIstio := content(kind, namespace, name, podnamespace, podname)
+
+	kk := strings.ToLower(kind)
+	if strings.HasSuffix(kk, "y") {
+		kk = kk[:len(kk)-1]
+		kk = kk + "ies"
+	} else {
+		kk = kk + "s"
+	}
+
+	// get config in k8s
+	gvr := fmt.Sprintf("networking.istio.io/v1alpha3/%s", kk)
+	nn := fmt.Sprintf("%s/%s", strings.ToLower(namespace), strings.ToLower(name))
+
+	o, err := i.App().factory.Get(gvr, nn, true, labels.NewSelector())
+	if err != nil {
+		log.Error().Msgf("get gvr %s, nn %s err: %s", gvr, nn, err.Error())
+		return evt
+	}
+
+	// marshal to json
+	configInKubernetst, err:= json.MarshalIndent(o.(*unstructured.Unstructured).Object, "", "  ")
+	if err != nil {
+		log.Error().Msgf("marshal runtime object to json err", err)
+		return evt
+	}
+
+	// diff
+	differ := gojsondiff.New()
+	diff, err:= differ.Compare(configInKubernetst, configInIstio)
+	if err != nil {
+		log.Error().Msgf("get err in json diff, %s", err)
+		return evt
+	}
+
+	var aJson map[string]interface{}
+	json.Unmarshal(configInKubernetst, &aJson)
+
+	config := formatter.AsciiFormatterConfig{
+		ShowArrayIndex: true,
+		Coloring:       false,
+	}
+	formatter := formatter.NewAsciiFormatter(aJson, config)
+	res, err := formatter.Format(diff)
+
+	//format := formatter.NewDeltaFormatter()
+	//res, err := format.Format(diff)
+	if err != nil {
+		log.Error().Msgf("get err in json diff, %s", err)
+		return evt
+	}
+
+	details := NewDetails(i.App(), "diff", "k8s->istio", true)
+	details.Update(res)
+	if err := i.App().inject(details); err != nil {
+		i.App().Flash().Err(err)
+	}
+	return evt
 }
 
 func (i * IstioConfigzView) watch(evt *tcell.EventKey) *tcell.EventKey {
@@ -84,14 +160,19 @@ func (i * IstioConfigzView) watch(evt *tcell.EventKey) *tcell.EventKey {
 			case <- timer.C:
 				if details != nil {
 					watched := content(kind, namespace, name, podnamespace, podname)
-					if !reflect.DeepEqual(watched, old) {
-						prefix = "## config has changed in last flush \n"
+					b, changed, err := jsonDiff(old, watched)
+					if err != nil {
+						log.Error().Msgf("get err in json diff, %s", err.Error())
+						continue
 					}
-					buf = []byte(prefix)
-					buf = append(buf, watched...)
-					details.Update(string(buf))
-					prefix = ""
-					old = watched
+					if changed {
+						prefix = fmt.Sprintf("## config has changed in last flush, time: %s\n", time.Now().Format("2006-01-02 15:04:05.999999999"))
+						buf = []byte(prefix)
+						buf = append(buf, b...)
+						details.Update(string(buf))
+						prefix = ""
+						old = watched
+					}
 				}
 			}
 		}
@@ -186,3 +267,21 @@ func parse(kind, namespace, name string, items []Configz) Configz {
 }
 
 
+func jsonDiff(s1, s2 []byte) (string, bool, error){
+	differ := gojsondiff.New()
+	diff, err:= differ.Compare(s1, s2)
+	if err != nil {
+		return "", false , err
+	}
+
+	var aJson map[string]interface{}
+	json.Unmarshal(s1, &aJson)
+
+	config := formatter.AsciiFormatterConfig{
+		ShowArrayIndex: true,
+		Coloring:       false,
+	}
+	formatter := formatter.NewAsciiFormatter(aJson, config)
+	b, err := formatter.Format(diff)
+	return b, diff.Modified(), err
+}

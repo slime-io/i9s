@@ -43,6 +43,11 @@ require (
 require (
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.9
+	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369
 	github.com/prometheus/client_model v0.2.0
+	github.com/prometheus/common v0.33.0
 	github.com/prometheus/prom2json v1.3.1
+	github.com/yudai/gojsondiff v1.0.0
+	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
+	github.com/yudai/pp v2.0.1+incompatible // indirect
 )
