@@ -232,7 +232,6 @@ type MetaData struct {
 	Annotations interface{} `json:"annotations"`
 	ResourceVersion string `json:"resourceVersion"`
 	CreationTimestamp string `json:"creationTimestamp,"`
-	Generation int64 `json:"generation,omitempty"`
 }
 
 func getConfigz(namespace, name string) string {
