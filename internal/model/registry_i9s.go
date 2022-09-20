@@ -42,4 +42,8 @@ func init() {
 		DAO:          &dao.IstioAdsz{},
 		Renderer:     &render.IstioAdsz{},
 	}
+	Registry["iptableInfo"] = ResourceMeta{
+		DAO:          &dao.IptableInfo{},
+		Renderer:     &render.IptableInfo{},
+	}
 }
