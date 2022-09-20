@@ -69,4 +69,11 @@ func loadi9s(m ResourceMetas) {
 		Verbs:        []string{},
 		Categories:   []string{"k9s"},
 	}
+	m[client.NewGVR("iptableInfo")] = metav1.APIResource{
+		Name:         "iptableInfo",
+		Kind:         "iptableInfo",
+		SingularName: "iptableInfo",
+		Verbs:        []string{},
+		Categories:   []string{"k9s"},
+	}
 }

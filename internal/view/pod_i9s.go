@@ -15,16 +15,60 @@ func (p *Pod) showProxyConfig(evt *tcell.EventKey) *tcell.EventKey {
 	if path == "" {
 		return evt
 	}
+
+	if !p.containProxy() {
+		log.Debug().Msgf("pod %s has no istio-proxy, skip", path)
+		return nil
+	}
+
+	//log.Info().Msgf("get path %s in showProxyConfig", path)
+	eda := NewEnvoyApiView(client.NewGVR("eda"))
+	eda.SetContextFn(p.coContext)
+	if err := p.App().inject(eda); err != nil {
+		p.App().Flash().Err(err)
+		return evt
+	}
+	return nil
+}
+
+func (p *Pod) showProxyIptableInfo(evt *tcell.EventKey) *tcell.EventKey {
+
+	path := p.GetTable().GetSelectedItem()
+	//log.Info().Msgf("get pods %s in showProxyMetaInfo", path)
+	if path == "" {
+		return evt
+	}
+
+	if !p.containProxy() {
+		log.Debug().Msgf("pod %s has no istio-proxy, skip", path)
+		return nil
+	}
+
+	info := NewIptableInfoView(client.NewGVR("iptableInfo"))
+	info.SetContextFn(p.coContext)
+	if err := p.App().inject(info); err != nil {
+		p.App().Flash().Err(err)
+		return evt
+	}
+	return nil
+}
+
+
+func (p *Pod) containProxy() bool {
+	path := p.GetTable().GetSelectedItem()
+	if path == "" {
+		return false
+	}
 	po, err := p.App().factory.Get("v1/pods", p.GetTable().GetSelectedItem(), true, labels.Everything())
 	if err != nil {
 		log.Error().Msgf("get pods %s err, %s", p.GetTable().GetSelectedItem(), err.Error())
-		return evt
+		return false
 	}
 	pod := v1.Pod{}
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(po.(*unstructured.Unstructured).Object, &pod)
 	if err != nil {
 		log.Error().Msgf("Unstructured convert to configmap err, %s", err.Error())
-		return evt
+		return false
 	}
 	has := false
 	for _, co := range pod.Status.ContainerStatuses {
@@ -33,17 +77,5 @@ func (p *Pod) showProxyConfig(evt *tcell.EventKey) *tcell.EventKey {
 			break
 		}
 	}
-	if ! has {
-		log.Debug().Msgf("pod %s has no istio-proxy, skip", p.GetTable().GetSelectedItem())
-		return evt
-	}
-
-	log.Info().Msgf("get path %s in showProxyConfig", path)
-	eda := NewEnvoyApiView(client.NewGVR("eda"))
-	eda.SetContextFn(p.coContext)
-	if err := p.App().inject(eda); err != nil {
-		p.App().Flash().Err(err)
-		return evt
-	}
-	return nil
+	return has
 }
