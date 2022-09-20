@@ -41,7 +41,6 @@ func NewPod(gvr client.GVR) ResourceViewer {
 		),
 	)
 	p.AddBindKeysFn(p.bindKeys)
-
 	p.GetTable().SetEnterFn(p.showContainers)
 	p.GetTable().SetColorerFn(render.Pod{}.ColorerFunc())
 	p.GetTable().SetDecorateFn(p.portForwardIndicator)

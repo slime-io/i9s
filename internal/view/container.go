@@ -222,8 +222,6 @@ func (c *Container) listForwardable(path string) (port.ContainerPortSpecs, map[s
 	if err != nil {
 		return nil, nil, false
 	}
-	// istio-system/istiod-112-79dd58f89-7frzh in listForwardable
-	log.Info().Msgf("%s in listForwardable", c.GetTable().Path)
 	co, err := locateContainer(path, po.Spec.Containers)
 	if err != nil {
 		c.App().Flash().Err(err)
