@@ -89,7 +89,7 @@ func (ff Forwarders) Kill(path string) int {
 		victim := k
 		if victim == path {
 			stats++
-			log.Info().Msgf("Stop + Delete port-forward %s", victim)
+			log.Debug().Msgf("Stop + Delete port-forward %s", victim)
 			f.Stop()
 			delete(ff, victim)
 		}
@@ -102,6 +102,6 @@ func (ff Forwarders) Kill(path string) int {
 func (ff Forwarders) Dump() {
 	log.Debug().Msgf("----------- PORT-FORWARDS --------------")
 	for k, f := range ff {
-		log.Info().Msgf("  %s -- %#v", k, f)
+		log.Debug().Msgf("  %s -- %#v", k, f)
 	}
 }

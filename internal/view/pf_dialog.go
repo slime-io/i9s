@@ -71,8 +71,6 @@ func ShowPortForwards(v ResourceViewer, path string, ports port.ContainerPortSpe
 			v.App().Flash().Err(fmt.Errorf("container to local port mismatch"))
 			return
 		}
-		//discovery::8080, 8080 in ShowPortForwards
-		log.Info().Msgf("%s, %s in ShowPortForwards", coField.GetText(), loField.GetText())
 		tt, err := port.ToTunnels(address, coField.GetText(), loField.GetText())
 		if err != nil {
 			v.App().Flash().Err(err)

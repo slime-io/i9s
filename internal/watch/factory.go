@@ -251,7 +251,7 @@ func (f *Factory) AddForwarder(pf Forwarder) {
 // DeleteForwarder deletes portforward for a given container.
 func (f *Factory) DeleteForwarder(path string) {
 	count := f.forwarders.Kill(path)
-	log.Info().Msgf("Deleted (%d) portforward for %q", count, path)
+	log.Warn().Msgf("Deleted (%d) portforward for %q", count, path)
 }
 
 // Forwarders returns all portforwards.

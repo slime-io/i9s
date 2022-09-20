@@ -22,6 +22,10 @@ import (
 )
 // i9s help
 
+const (
+	istioRev = "istio.io/rev"
+)
+
 var (
 	apisNeedPodSelect = []string{"adsz", "connections", "instancesz", "syncz", "edsz", "sidecarz", "config_dump", "metrics", "xds_push_stats"}
 	apisNeedProxyID = []string{"edsz", "sidecarz", "config_dump"}
@@ -65,8 +69,10 @@ func execi9sCmd(i ResourceViewer, path, podName, rev, ProxyID string){
 	<- time.After(200*time.Millisecond)
 
 	// exec cmd
-	_, err = net.Dial("tcp", fmt.Sprintf("localhost:%s", nodePort))
-	if err != nil {
+	con, err := net.Dial("tcp", fmt.Sprintf("localhost:%s", nodePort))
+	if err == nil {
+		con.Close()
+	} else {
 		<- time.After(400*time.Millisecond)
 	}
 	execCmd(i, path, nodePort, ProxyID)
