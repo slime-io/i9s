@@ -16,15 +16,15 @@ import (
 	"strings"
 )
 
-type EnvoyMetaInfoView struct {
+type ProxyinfoExView struct {
 	ResourceViewer
 }
 
-func NewIptableInfoView(gvr client.GVR) ResourceViewer {
-	c := EnvoyMetaInfoView{
+func NewProxyinfoExView(gvr client.GVR) ResourceViewer {
+	c := ProxyinfoExView{
 		ResourceViewer: NewBrowser(gvr),
 	}
-	c.GetTable().SetColorerFn(render.IstioProxyID{}.ColorerFunc())
+	c.GetTable().SetColorerFn(render.ProxyInfoEx{}.ColorerFunc())
 	c.GetTable().SetBorderFocusColor(tcell.ColorMediumSpringGreen)
 	c.GetTable().SetSelectedStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorMediumSpringGreen).Attributes(tcell.AttrNone))
 	c.SetContextFn(c.chartContext)
@@ -32,26 +32,25 @@ func NewIptableInfoView(gvr client.GVR) ResourceViewer {
 	return &c
 }
 
-func (i *EnvoyMetaInfoView) chartContext(ctx context.Context) context.Context {
+func (i *ProxyinfoExView) chartContext(ctx context.Context) context.Context {
 	return ctx
 }
 
-func (i *EnvoyMetaInfoView) enter(app *App, model ui.Tabular, gvr, path string) {
+func (i *ProxyinfoExView) enter(app *App, model ui.Tabular, gvr, path string) {
 
-	path, cf, err := parseIptableInfoView(path)
+	path, cf, err := parseInfoView(path)
 	if err != nil {
 		log.Error().Msgf("get error in parseIptableInfoView, %s", err)
 		return
 	}
 
-	switch cf {
-	case "IptableInfo":
-		i.GetIptablesInfo(path)
-	default:
+	if strings.HasPrefix(cf, "iptables") {
+		str := "sudo iptables -t nat -S"
+		i.GetIptablesInfo(path, str)
 	}
 }
 
-func (i *EnvoyMetaInfoView) GetIptablesInfo(path string) {
+func (i *ProxyinfoExView) GetIptablesInfo(path, str string) {
 
 	po, err := i.App().factory.Get("v1/pods", path, true, labels.Everything())
 	if err != nil {
@@ -66,7 +65,7 @@ func (i *EnvoyMetaInfoView) GetIptablesInfo(path string) {
 	}
 	meta := IptablesMeta{}
 
-	details , ok := pod.Annotations["envoy.io/iptablesDetail"]
+	details, ok := pod.Annotations["envoy.io/iptablesDetail"]
 	if ok {
 		meta.IptablesDetails = details
 	}
@@ -75,7 +74,7 @@ func (i *EnvoyMetaInfoView) GetIptablesInfo(path string) {
 		meta.IptablesParams = parameters
 	}
 
-	info := i.GetIptablesInContainer(path)
+	info := i.GetIptablesInContainer(path, str)
 	meta.IptablesRule = info
 
 	content, err := convert2String(meta)
@@ -92,38 +91,37 @@ func (i *EnvoyMetaInfoView) GetIptablesInfo(path string) {
 
 type IptablesMeta struct {
 	IptablesDetails string `json:"iptables_details,omitempty"`
-	IptablesParams string `json:"iptables_params,omitempty"`
-	IptablesRule string `json:"iptables_rule,omitempty"`
+	IptablesParams  string `json:"iptables_params,omitempty"`
+	IptablesRule    string `json:"iptables_rule,omitempty"`
 }
 
-func (i *EnvoyMetaInfoView) GetIptablesInContainer(path string) string{
+func (i *ProxyinfoExView) GetIptablesInContainer(path, str string) string {
 	parts := strings.Split(path, "/")
 	if len(parts) != 2 {
 		return ""
 	}
 	log.Info().Msgf("get path %s in GetIptablesInContainer", parts)
-	info := execProxyCmd(parts[1], parts[0])
+	info := KubectlProxyCmd(parts[1], parts[0], str)
 	return info
 }
 
+func KubectlProxyCmd(name, ns, str string) string {
 
-func parseIptableInfoView(s string) (string, string, error) {
-	parts := strings.Split(s, "#")
-	if len(parts) != 2 {
-		return "", "", fmt.Errorf("except 2 items in %s", s)
-	}
-
-	return parts[0], parts[1], nil
-}
-
-func execProxyCmd(name,ns string) string {
-
-	str := fmt.Sprintf("kubectl exec %s -n %s -c istio-proxy -- sudo iptables -t nat -S", name, ns)
-	log.Info().Msgf("exec %s", str)
+	cmd := fmt.Sprintf("kubectl exec %s -n %s -c istio-proxy -- %s", name, ns, str)
+	log.Info().Msgf("prepare exec cmd: %s", cmd)
 	out, err := exec.Command("sh", []string{"-c", str}...).Output()
 	if err != nil {
 		log.Error().Msgf("execProxyCmd err, %s", err)
 		return ""
 	}
 	return string(out)
+}
+
+func parseInfoView(s string) (string, string, error) {
+	parts := strings.Split(s, "#")
+	if len(parts) != 2 {
+		return "", "", fmt.Errorf("except 2 items in %s", s)
+	}
+
+	return parts[0], parts[1], nil
 }

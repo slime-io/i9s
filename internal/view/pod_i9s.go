@@ -31,7 +31,7 @@ func (p *Pod) showProxyConfig(evt *tcell.EventKey) *tcell.EventKey {
 	return nil
 }
 
-func (p *Pod) showProxyIptableInfo(evt *tcell.EventKey) *tcell.EventKey {
+func (p *Pod) showProxyInfo(evt *tcell.EventKey) *tcell.EventKey {
 
 	path := p.GetTable().GetSelectedItem()
 	//log.Info().Msgf("get pods %s in showProxyMetaInfo", path)
@@ -44,7 +44,7 @@ func (p *Pod) showProxyIptableInfo(evt *tcell.EventKey) *tcell.EventKey {
 		return nil
 	}
 
-	info := NewIptableInfoView(client.NewGVR("iptableInfo"))
+	info := NewProxyInfoView(client.NewGVR("proxyInfo"))
 	info.SetContextFn(p.coContext)
 	if err := p.App().inject(info); err != nil {
 		p.App().Flash().Err(err)
@@ -53,6 +53,27 @@ func (p *Pod) showProxyIptableInfo(evt *tcell.EventKey) *tcell.EventKey {
 	return nil
 }
 
+func (p *Pod) showProxyInfoEx(evt *tcell.EventKey) *tcell.EventKey {
+
+	path := p.GetTable().GetSelectedItem()
+	//log.Info().Msgf("get pods %s in showProxyMetaInfo", path)
+	if path == "" {
+		return evt
+	}
+
+	if !p.containProxy() {
+		log.Debug().Msgf("pod %s has no istio-proxy, skip", path)
+		return nil
+	}
+
+	info := NewProxyinfoExView(client.NewGVR("proxyInfoEx"))
+	info.SetContextFn(p.coContext)
+	if err := p.App().inject(info); err != nil {
+		p.App().Flash().Err(err)
+		return evt
+	}
+	return nil
+}
 
 func (p *Pod) containProxy() bool {
 	path := p.GetTable().GetSelectedItem()

@@ -22,9 +22,10 @@ cover:  ## Run test coverage suite
 	@go tool cover --html=cov.out
 
 build:  ## Builds the CLI
-	@go build ${GO_FLAGS} \
-	-ldflags "-w -s -X ${PACKAGE}/cmd.version=${VERSION} -X ${PACKAGE}/cmd.commit=${GIT_REV} -X ${PACKAGE}/cmd.date=${DATE}" \
+	@CGO_ENABLED=0 go build ${GO_FLAGS} \
+	-ldflags "-w -s -X ${PACKAGE}/cmd.version=${VERSION} -X ${PACKAGE}/cmd.commit=${GIT_REV} -X ${PACKAGE}/cmd.date=${DATE} -extldflags -static" \
 	-a -tags netgo -o ${OUTPUT_BIN} main.go
+
 
 kubectl-stable-version:  ## Get kubectl latest stable version
 	@curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt

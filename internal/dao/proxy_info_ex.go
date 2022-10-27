@@ -8,16 +8,17 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// IptableInfo
-type IptableInfo struct {
+// ProxyInfo
+type ProxyInfoEx struct {
 	NonResource
 }
 
 // List
-func (i IptableInfo) List(ctx context.Context, ns string) ([]runtime.Object, error) {
+func (i ProxyInfoEx) List(ctx context.Context, ns string) ([]runtime.Object, error) {
 	oo := make([]runtime.Object, 0)
+	// "iptables -t nat -S",
 	command := []string{
-		"IptableInfo",
+		"iptables rule",
 	}
 
 	path, ok := ctx.Value(internal.KeyPath).(string)
@@ -27,7 +28,7 @@ func (i IptableInfo) List(ctx context.Context, ns string) ([]runtime.Object, err
 	}
 
 	for _, f := range command {
-		oo = append(oo, render.IptableInfoRes{Name: f, Parent: path})
+		oo = append(oo, render.ProxyInfoExRes{Name: f, Parent: path})
 	}
 	return oo, nil
 }
