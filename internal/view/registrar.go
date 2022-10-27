@@ -103,6 +103,9 @@ func miscViewers(vv MetaViewers) {
 	vv[client.NewGVR("ic")] = MetaViewer{
 		viewerFn: NewIstioConfigView,
 	}
+	vv[client.NewGVR("istioctlView")] = MetaViewer{
+		viewerFn: NewIstioctlView,
+	}
 }
 
 func appsViewers(vv MetaViewers) {

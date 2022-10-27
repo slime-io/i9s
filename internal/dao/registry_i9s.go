@@ -69,10 +69,24 @@ func loadi9s(m ResourceMetas) {
 		Verbs:        []string{},
 		Categories:   []string{"k9s"},
 	}
-	m[client.NewGVR("iptableInfo")] = metav1.APIResource{
-		Name:         "iptableInfo",
-		Kind:         "iptableInfo",
-		SingularName: "iptableInfo",
+	m[client.NewGVR("proxyInfo")] = metav1.APIResource{
+		Name:         "proxyInfo",
+		Kind:         "proxyInfo",
+		SingularName: "proxyInfo",
+		Verbs:        []string{},
+		Categories:   []string{"k9s"},
+	}
+	m[client.NewGVR("proxyInfoEx")] = metav1.APIResource{
+		Name:         "proxyInfoEx",
+		Kind:         "proxyInfoEx",
+		SingularName: "proxyInfoEx",
+		Verbs:        []string{},
+		Categories:   []string{"k9s"},
+	}
+	m[client.NewGVR("istioctlView")] = metav1.APIResource{
+		Name:         "istioctlView",
+		Kind:         "istioctlView",
+		SingularName: "istioctlView",
 		Verbs:        []string{},
 		Categories:   []string{"k9s"},
 	}

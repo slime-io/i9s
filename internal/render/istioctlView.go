@@ -8,15 +8,15 @@ import (
 	"strings"
 )
 
-type IptableInfo struct{}
+type IstioctlView struct{}
 
-func (i IptableInfo) IsGeneric() bool {
+func (i IstioctlView) IsGeneric() bool {
 	return false
 }
 
-func (i IptableInfo) Render(o interface{}, ns string, r *Row) error {
+func (i IstioctlView) Render(o interface{}, ns string, r *Row) error {
 
-	res, ok := o.(IptableInfoRes)
+	res, ok := o.(IstioctlViewRes)
 	if !ok {
 		return fmt.Errorf("expected EnvoyAPIRes, but got %T", o)
 	}
@@ -25,30 +25,29 @@ func (i IptableInfo) Render(o interface{}, ns string, r *Row) error {
 	return nil
 }
 
-func (i IptableInfo) Header(ns string) Header {
+func (i IstioctlView) Header(ns string) Header {
 	return Header{
-		HeaderColumn{Name: "iptableInfo"},
+		HeaderColumn{Name: "istioctl command items"},
 	}
 }
 
-func (i IptableInfo) ColorerFunc() ColorerFunc {
+func (i IstioctlView) ColorerFunc() ColorerFunc {
 	return func(ns string, _ Header, re RowEvent) tcell.Color {
 		return tcell.ColorCadetBlue
 	}
 }
 
-// EnvoyAPIRes represents an envoy debug api resource.
-type IptableInfoRes struct {
-	Name string
+type IstioctlViewRes struct {
+	Name   string
 	Parent string
 }
 
 // GetObjectKind returns a schema object.
-func (IptableInfoRes) GetObjectKind() schema.ObjectKind {
+func (IstioctlViewRes) GetObjectKind() schema.ObjectKind {
 	return nil
 }
 
 // DeepCopyObject returns a container copy.
-func (h IptableInfoRes) DeepCopyObject() runtime.Object {
+func (h IstioctlViewRes) DeepCopyObject() runtime.Object {
 	return h
 }

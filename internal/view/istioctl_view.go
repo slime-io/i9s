@@ -2,6 +2,7 @@ package view
 
 import (
 	"context"
+	"fmt"
 	"github.com/derailed/k9s/internal/client"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/derailed/k9s/internal/ui"
@@ -9,56 +10,50 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// IstioView represents a istio command viewer.
-type IstioView struct {
+type IstioctlView struct {
 	ResourceViewer
 }
 
-func NewIstio(gvr client.GVR) ResourceViewer {
-	c := IstioView{
+func NewIstioctlView(gvr client.GVR) ResourceViewer {
+	c := IstioctlView{
 		ResourceViewer: NewBrowser(gvr),
 	}
-	c.GetTable().SetColorerFn(render.Istio{}.ColorerFunc())
+	c.GetTable().SetColorerFn(render.IstioctlView{}.ColorerFunc())
 	c.GetTable().SetBorderFocusColor(tcell.ColorMediumSpringGreen)
 	c.GetTable().SetSelectedStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorMediumSpringGreen).Attributes(tcell.AttrNone))
-	c.AddBindKeysFn(c.bindKeys)
 	c.SetContextFn(c.chartContext)
-	c.GetTable().SetEnterFn(c.showIstioConfig)
+	c.GetTable().SetEnterFn(c.enter)
 	return &c
 }
 
-func (i *IstioView) chartContext(ctx context.Context) context.Context {
-	rev := i.GetTable().GetSelectedItem()
-	return context.WithValue(ctx, "parent", rev)
+func (i *IstioctlView) chartContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, "parent", i.GetTable().GetSelectedItem())
 }
 
-func (i *IstioView) bindKeys(aa ui.KeyActions) {
-	aa.Add(ui.KeyActions{
-		ui.KeyM: ui.NewKeyAction("isito api", i.debug, true),
-	})
+func (i *IstioctlView) enter(app *App, model ui.Tabular, gvr, path string) {
+	_, cmd, err := parseRevWithAPI(path)
+	if err != nil {
+		log.Error().Msgf("get error in parseRevWithAPI, %s", err)
+		return
+	}
+	i.istioctlCmd(cmd)
 }
 
-func (i *IstioView) debug(evt *tcell.EventKey) *tcell.EventKey {
-	sel := i.GetTable().GetSelectedItem()
-	log.Debug().Msgf("get sel %s in debug", sel)
-	if sel == "" {
-		return evt
+func (i *IstioctlView) istioctlCmd(item string) {
+	cmd := fmt.Sprintf("%s | less", item)
+	log.Info().Msgf("prepare exec cmd: %s", cmd)
+	cb := func() {
+		opts := shellOpts{
+			clear:      false,
+			binary:     "sh",
+			background: false,
+			args:       []string{"-c", cmd},
+		}
+		if run(i.App(), opts) {
+			i.App().Flash().Info("command launched successfully in proxyInfo!")
+			return
+		}
+		i.App().Flash().Info("command failed in proxyInfo!")
 	}
-	ida := NewIstioApiView(client.NewGVR("ida"))
-	ida.SetContextFn(i.chartContext)
-	if err := i.App().inject(ida); err != nil {
-		i.App().Flash().Err(err)
-		return evt
-	}
-	return nil
-}
-
-func (i *IstioView) showIstioConfig(app *App, model ui.Tabular, gvr, path string) {
-	//sel := i.GetTable().GetSelectedItem()
-	//log.Info().Msgf("get sel %s in debug in showIstioConfig ", sel)
-	ic := NewIstioConfigView(client.NewGVR("ic"))
-	ic.SetContextFn(i.chartContext)
-	if err := i.App().inject(ic); err != nil {
-		i.App().Flash().Err(err)
-	}
+	cb()
 }

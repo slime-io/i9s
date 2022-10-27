@@ -72,10 +72,11 @@ func (p *Pod) bindKeys(aa ui.KeyActions) {
 	if !p.App().Config.K9s.IsReadOnly() {
 		p.bindDangerousKeys(aa)
 	}
-   aa.Add(ui.KeyActions{
-   	    ui.KeyM: ui.NewKeyAction("Envoy Debug", p.showProxyConfig,true),
-	    ui.KeyN: ui.NewKeyAction("IptableInfo", p.showProxyIptableInfo,true),
-   })
+	aa.Add(ui.KeyActions{
+		ui.KeyM: ui.NewKeyAction("Envoy debug api view", p.showProxyConfig, true),
+		ui.KeyN: ui.NewKeyAction("Istioctl view", p.showProxyInfo, true),
+		ui.KeyB: ui.NewKeyAction("ProxyEx view", p.showProxyInfoEx, true),
+	})
 	aa.Add(ui.KeyActions{
 		ui.KeyF:      ui.NewKeyAction("Show PortForward", p.showPFCmd, true),
 		ui.KeyShiftR: ui.NewKeyAction("Sort Ready", p.GetTable().SortColCmd(readyCol, true), false),
