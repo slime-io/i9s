@@ -10,17 +10,17 @@ import (
 	"strings"
 )
 
-var usefx = true
+var usefx_router = true
 
-type EnvoyApiView struct {
+type EnvoyApiRouterView struct {
 	ResourceViewer
 }
 
-func NewEnvoyApiView(gvr client.GVR) ResourceViewer {
-	c := EnvoyApiView{
+func NewEnvoyApiRouterView(gvr client.GVR) ResourceViewer {
+	c := EnvoyApiRouterView{
 		ResourceViewer: NewBrowser(gvr),
 	}
-	c.GetTable().SetColorerFn(render.EnvoyApi{}.ColorerFunc())
+	c.GetTable().SetColorerFn(render.EnvoyApiRouter{}.ColorerFunc())
 	c.GetTable().SetBorderFocusColor(tcell.ColorMediumSpringGreen)
 	c.GetTable().SetSelectedStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorMediumSpringGreen).Attributes(tcell.AttrNone))
 	c.SetContextFn(c.chartContext)
@@ -29,25 +29,24 @@ func NewEnvoyApiView(gvr client.GVR) ResourceViewer {
 	return &c
 }
 
-func (e *EnvoyApiView) bindKeys(aa ui.KeyActions) {
+func (e *EnvoyApiRouterView) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
 		ui.KeyP: ui.NewKeyAction("switch to fx/less", e.switchon, true),
 	})
 }
 
-func (e *EnvoyApiView) switchon(evt *tcell.EventKey) *tcell.EventKey {
-	usefx = !usefx
+func (e *EnvoyApiRouterView) switchon(evt *tcell.EventKey) *tcell.EventKey {
+	usefx_router = !usefx_router
 	return nil
 }
 
-func (e *EnvoyApiView) chartContext(ctx context.Context) context.Context {
+func (e *EnvoyApiRouterView) chartContext(ctx context.Context) context.Context {
 	return ctx
 }
 
-func (e *EnvoyApiView) execCmd(app *App, model ui.Tabular, gvr, path string) {
-
+func (e *EnvoyApiRouterView) execCmd(app *App, model ui.Tabular, gvr, path string) {
 	namespace, name := client.Namespaced(e.GetTable().Path)
-	cmd := buildIstiocltCmd(path, name, namespace)
+	cmd := buildKubectlCmd(path, name, namespace)
 	cb := func() {
 		opts := shellOpts{
 			clear:      false,
@@ -64,17 +63,17 @@ func (e *EnvoyApiView) execCmd(app *App, model ui.Tabular, gvr, path string) {
 	cb()
 }
 
-func buildIstiocltCmd(key, name, namespace string) string {
+func buildKubectlCmd(key, name, namespace string) string {
 	parts := strings.Split(key, "/")
 	cmd := parts[1]
 	if cmd == "config_dump" {
-		cmd = "all"
+		str := fmt.Sprintf("kubectl exec %s -n %s -- curl 127.0.0.1:19000/config_dump -s", name, namespace)
+		if usefx_router {
+			str = str + " | fx"
+		} else {
+			str = str + " | less"
+		}
+		return str
 	}
-	str := fmt.Sprintf("istioctl proxy-config %s %s.%s -ojson", cmd, name, namespace)
-	if usefx {
-		str = str + " | fx"
-	} else {
-		str = str + " | less"
-	}
-	return str
+	return ""
 }

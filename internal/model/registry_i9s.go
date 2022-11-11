@@ -14,6 +14,10 @@ func init() {
 		DAO:      &dao.EnvoyApi{},
 		Renderer: &render.EnvoyApi{},
 	}
+	Registry["edaEx"] = ResourceMeta{
+		DAO:      &dao.EnvoyApiRouter{},
+		Renderer: &render.EnvoyApiRouter{},
+	}
 	Registry["ic"] = ResourceMeta{
 		DAO:      &dao.IstioConfig{},
 		Renderer: &render.IstioConfig{},

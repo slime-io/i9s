@@ -20,6 +20,13 @@ func loadi9s(m ResourceMetas) {
 		Verbs:        []string{},
 		Categories:   []string{"k9s"},
 	}
+	m[client.NewGVR("edaEx")] = metav1.APIResource{
+		Name:         "edaEx",
+		Kind:         "edaEx",
+		SingularName: "edaEx",
+		Verbs:        []string{},
+		Categories:   []string{"k9s"},
+	}
 	m[client.NewGVR("ida")] = metav1.APIResource{
 		Name:         "ida",
 		Kind:         "ida",

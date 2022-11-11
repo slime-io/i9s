@@ -33,9 +33,9 @@ func (i *IstioView) chartContext(ctx context.Context) context.Context {
 
 func (i *IstioView) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
-		ui.KeyM: ui.NewKeyAction("Istio debug api view", i.istioDebugApi, true),
+		ui.KeyM: ui.NewKeyAction("Istio-Debug-View", i.istioDebugApi, true),
 		//ui.KeyB: ui.NewKeyAction("istio config", i.showIstioConfig, true),
-		ui.KeyN: ui.NewKeyAction("Istioctl view", i.istioctlView, true),
+		ui.KeyN: ui.NewKeyAction("Istioctl-View", i.istioctlView, true),
 	})
 }
 

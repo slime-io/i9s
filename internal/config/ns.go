@@ -10,6 +10,8 @@ const (
 	MaxFavoritesNS = 9
 	defaultNS      = "default"
 	allNS          = "all"
+	IstioNS        = "istio-system"
+	HangoGatewayNS = "gateway-system"
 )
 
 // Namespace tracks active and favorites namespaces.
@@ -21,8 +23,8 @@ type Namespace struct {
 // NewNamespace create a new namespace configuration.
 func NewNamespace() *Namespace {
 	return &Namespace{
-		Active:    defaultNS,
-		Favorites: []string{defaultNS},
+		Active:    IstioNS,
+		Favorites: []string{defaultNS, IstioNS, HangoGatewayNS},
 	}
 }
 

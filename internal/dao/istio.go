@@ -12,15 +12,14 @@ const (
 	istioRev = "istio.io/rev"
 )
 
-// Istio represents a istio command.
 type Istio struct {
 	NonResource
 }
 
 func (i *Istio) List(ctx context.Context, ns string) ([]runtime.Object, error) {
 	oo := make([]runtime.Object, 0)
-	revisions := i.GetRev()
-	for _, f := range revisions {
+	revs := i.GetRev()
+	for _, f := range revs {
 		oo = append(oo, render.IstioRes{Name: f})
 	}
 	return oo, nil
@@ -38,21 +37,29 @@ func (i *Istio) ToYAML(path string, showManaged bool) (string, error) {
 
 func (i *Istio) GetRev() []string {
 	var revisions []string
+	revs := make(map[string]string, 0)
+
 	dial, err := i.Client().Dial()
 	if err != nil {
 		log.Error().Msgf("get client err in dao/istio, %s", err)
 		return revisions
 	}
-	hooks, err := dial.AdmissionregistrationV1beta1().MutatingWebhookConfigurations().List(context.TODO(), metav1.ListOptions{})
+	dps, err := dial.AppsV1().Deployments("").
+		List(context.TODO(), metav1.ListOptions{
+			LabelSelector: toSelector(map[string]string{"app": "istiod"}),
+		})
+
 	if err != nil {
-		log.Error().Msgf("list mutatingwebhookconfigurations err %s", err.Error())
+		log.Error().Msgf("list dps err %s", err.Error())
 		return revisions
 	}
-	for _, hook := range hooks.Items {
-		if rev, ok := hook.GetLabels()[istioRev]; ok {
-			revisions = append(revisions, rev)
+
+	for _, dp := range dps.Items {
+		if rev, ok := dp.Labels[istioRev]; ok {
+			if _, exist := revs[rev]; !exist {
+				revisions = append(revisions, rev)
+			}
 		}
 	}
-	log.Info().Msgf("get all istio revs %s", revisions)
 	return revisions
 }
