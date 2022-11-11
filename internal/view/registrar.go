@@ -97,6 +97,9 @@ func miscViewers(vv MetaViewers) {
 	vv[client.NewGVR("eda")] = MetaViewer{
 		viewerFn: NewEnvoyApiView,
 	}
+	vv[client.NewGVR("edaEx")] = MetaViewer{
+		viewerFn: NewEnvoyApiRouterView,
+	}
 	vv[client.NewGVR("ida")] = MetaViewer{
 		viewerFn: NewIstioApiView,
 	}
