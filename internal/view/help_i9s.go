@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 )
+
 // i9s help
 
 const (
@@ -28,11 +29,11 @@ const (
 
 var (
 	apisNeedPodSelect = []string{"adsz", "connections", "instancesz", "syncz", "edsz", "sidecarz", "config_dump", "metrics", "xds_push_stats"}
-	apisNeedProxyID = []string{"edsz", "sidecarz", "config_dump"}
-	exApis = []string{"configzEx", "adszEx"}
+	apisNeedProxyID   = []string{"edsz", "sidecarz", "config_dump"}
+	exApis            = []string{"configzEx", "adszEx"}
 )
 
-func execi9sCmd(i ResourceViewer, path, podName, rev, ProxyID string){
+func execi9sCmd(i ResourceViewer, path, podName, rev, ProxyID string) {
 	// if podName is "", choose first one in rev
 	if podName == "" {
 		podName = getPod(i, rev, "")
@@ -66,14 +67,14 @@ func execi9sCmd(i ResourceViewer, path, podName, rev, ProxyID string){
 	id := dao.PortForwardID(fmt.Sprintf("%s|%s", podName, container), container, fmt.Sprintf("%s:%s", nodePort, containerPort))
 	defer i.App().factory.DeleteForwarder(id)
 
-	<- time.After(200*time.Millisecond)
+	<-time.After(200 * time.Millisecond)
 
 	// exec cmd
 	con, err := net.Dial("tcp", fmt.Sprintf("localhost:%s", nodePort))
 	if err == nil {
 		con.Close()
 	} else {
-		<- time.After(400*time.Millisecond)
+		<-time.After(400 * time.Millisecond)
 	}
 	execCmd(i, path, nodePort, ProxyID)
 }
@@ -103,12 +104,12 @@ func execI9sCmdWithHttp(i ResourceViewer, path, podName, rev string) []string {
 		return ids
 	}
 	defer i.App().factory.DeleteForwarder(dao.PortForwardID(fmt.Sprintf("%s|%s", podName, container), container, fmt.Sprintf("%s:%s", localPort, containerPort)))
-	<- time.After(100*time.Millisecond)
+	<-time.After(100 * time.Millisecond)
 	ids = execHttp(path, localPort)
 	return ids
 }
 
-func execHttp(path, localPort string)  []string {
+func execHttp(path, localPort string) []string {
 	var ids []string
 	url := fmt.Sprintf("http://localhost:%s/debug/connections", localPort)
 	log.Info().Msgf("request url with http client %s", url)
@@ -124,7 +125,7 @@ func execHttp(path, localPort string)  []string {
 		return ids
 	}
 	log.Debug().Msgf("get info from pilot connection %s", string(b))
-	clients :=  &Clients{}
+	clients := &Clients{}
 	err = json.Unmarshal(b, clients)
 	if err != nil {
 		log.Error().Msgf("unmarshal err in do http to connections, %s", err)
@@ -173,7 +174,7 @@ func portForward(i ResourceViewer, pf watch.Forwarder, f *portforward.PortForwar
 	}
 }
 
-func getPod(i ResourceViewer,rev, ns string) string {
+func getPod(i ResourceViewer, rev, ns string) string {
 	podNames := getAllPod(i, rev, ns)
 	log.Info().Msgf("get pilot %v pod in rev %s", podNames, rev)
 	if len(podNames) > 0 {
@@ -186,7 +187,7 @@ func getAllPod(i ResourceViewer, rev, ns string) []string {
 
 	podNames := make([]string, 0)
 	label := map[string]string{istioRev: rev, "app": "istiod"}
-	oo, err := i.App().factory.List("v1/pods", ns,false, labels.Set(label).AsSelector())
+	oo, err := i.App().factory.List("v1/pods", ns, false, labels.Set(label).AsSelector())
 	if err != nil {
 		return podNames
 	}
@@ -203,7 +204,7 @@ func getAllPod(i ResourceViewer, rev, ns string) []string {
 	return podNames
 }
 
-func execCmd(i ResourceViewer, path, localPort, ProxyID string){
+func execCmd(i ResourceViewer, path, localPort, ProxyID string) {
 	cmd := buildCmd(path, localPort, ProxyID)
 	cb := func() {
 		opts := shellOpts{
@@ -224,7 +225,7 @@ func execCmd(i ResourceViewer, path, localPort, ProxyID string){
 func buildCmd(path, nodePort, proxyID string) string {
 
 	if path == "metrics" {
-		cmd:= fmt.Sprintf("curl localhost:%s/%s -s | less", nodePort, path)
+		cmd := fmt.Sprintf("curl localhost:%s/%s -s | less", nodePort, path)
 		return cmd
 	}
 
@@ -282,7 +283,7 @@ func needEx(path string) bool {
 func formatIstioAPI(api string) (string, error) {
 	parts := strings.Split(api, "/")
 	if len(parts) != 2 {
-		return "" , fmt.Errorf("except 2 items in %s", api)
+		return "", fmt.Errorf("except 2 items in %s", api)
 	}
 	return parts[1], nil
 }
@@ -315,7 +316,7 @@ func parseIstioPodView(s string) (string, string, string, error) {
 }
 
 // 112 # istio/sidecarz # istio-system/istiod-112-79dd58f89-slrgd # a-v1.s-568669c495-4pdvp.powerful-14168
-func parseIstioProxyIDViewID(s string) (string, string, string){
+func parseIstioProxyIDViewID(s string) (string, string, string) {
 	parts := strings.Split(s, "#")
 	_, api, pilot, proxy := parts[0], parts[1], parts[2], parts[3]
 	return api, pilot, proxy
@@ -333,4 +334,13 @@ func convert2String(obj interface{}) (string, error) {
 		return "", err
 	}
 	return string(data), nil
+}
+
+func toSelector(m map[string]string) string {
+	s := make([]string, 0, len(m))
+	for k, v := range m {
+		s = append(s, k+"="+v)
+	}
+
+	return strings.Join(s, ",")
 }

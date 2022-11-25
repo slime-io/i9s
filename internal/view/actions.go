@@ -109,6 +109,7 @@ func pluginActions(r Runner, aa ui.KeyActions) {
 			pluginAction(r, plugin),
 			true)
 	}
+
 }
 
 func pluginAction(r Runner, p config.Plugin) ui.ActionHandler {

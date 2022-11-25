@@ -3,6 +3,7 @@ package view
 import (
 	"context"
 	"encoding/json"
+	"github.com/derailed/k9s/internal"
 	"github.com/derailed/k9s/internal/client"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/derailed/k9s/internal/ui"
@@ -57,7 +58,7 @@ func (i *IstioPodView) chartContext(ctx context.Context) context.Context {
 			log.Error().Msgf("marshal %+v err %s", m, err)
 			return ctx
 		}
-		return context.WithValue(ctx, "parent", string(b))
+		return context.WithValue(ctx, internal.Parent, string(b))
 	}
 	return ctx
 }

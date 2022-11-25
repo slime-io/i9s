@@ -30,4 +30,7 @@ const (
 	KeyWithMetrics ContextKey = "withMetrics"
 	KeyViewConfig  ContextKey = "viewConfig"
 	KeyWait        ContextKey = "wait"
+	ExtensionType  ContextKey = "extensionType"
+	IstioRev       ContextKey = "rev"
+	Parent         ContextKey = "istioParent"
 )

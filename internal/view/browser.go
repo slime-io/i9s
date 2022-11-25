@@ -480,7 +480,6 @@ func (b *Browser) refreshActions() {
 		aa[ui.KeyY] = ui.NewKeyAction("YAML", b.viewCmd, true)
 		aa[ui.KeyD] = ui.NewKeyAction("Describe", b.describeCmd, true)
 	}
-
 	pluginActions(b, aa)
 	hotKeyActions(b, aa)
 	for _, f := range b.bindKeysFn {
