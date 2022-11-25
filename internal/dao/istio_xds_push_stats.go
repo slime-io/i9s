@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/derailed/k9s/internal"
 	"github.com/derailed/k9s/internal/render"
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/prom2json"
@@ -15,6 +16,7 @@ import (
 	"strings"
 	"time"
 )
+
 var pre = make(map[string]string)
 
 type IstioXdsPushStats struct {
@@ -27,9 +29,9 @@ func (i IstioXdsPushStats) List(ctx context.Context, ns string) ([]runtime.Objec
 	now := time.Now()
 	log.Debug().Msgf("begin time is %s", now.String())
 
-	parent, ok := ctx.Value("parent").(string)
+	parent, ok := ctx.Value(internal.Parent).(string)
 	if !ok {
-		log.Error().Msgf("Expecting a string but got %T", ctx.Value("parent"))
+		log.Error().Msgf("Expecting a string but got %T", ctx.Value(internal.Parent))
 		return oo, nil
 	}
 
@@ -55,7 +57,7 @@ func (i IstioXdsPushStats) List(ctx context.Context, ns string) ([]runtime.Objec
 		for k, v := range metrics {
 			newVal := toNum(v)
 			oldVal := toNum(pre[k])
-			res[k] =  strconv.Itoa(newVal-oldVal)
+			res[k] = strconv.Itoa(newVal - oldVal)
 		}
 		pre = metrics
 	}
@@ -66,7 +68,6 @@ func (i IstioXdsPushStats) List(ctx context.Context, ns string) ([]runtime.Objec
 	}
 	return oo, nil
 }
-
 
 func parseMetrics(content string) map[string]string {
 	mfChan := make(chan *dto.MetricFamily, 1024)

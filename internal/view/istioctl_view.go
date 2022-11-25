@@ -3,6 +3,7 @@ package view
 import (
 	"context"
 	"fmt"
+	"github.com/derailed/k9s/internal"
 	"github.com/derailed/k9s/internal/client"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/derailed/k9s/internal/ui"
@@ -27,7 +28,7 @@ func NewIstioctlView(gvr client.GVR) ResourceViewer {
 }
 
 func (i *IstioctlView) chartContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, "parent", i.GetTable().GetSelectedItem())
+	return context.WithValue(ctx, internal.Parent, i.GetTable().GetSelectedItem())
 }
 
 func (i *IstioctlView) enter(app *App, model ui.Tabular, gvr, path string) {

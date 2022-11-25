@@ -58,4 +58,8 @@ func init() {
 		DAO:      &dao.IstioctlView{},
 		Renderer: &render.IstioctlView{},
 	}
+	Registry["i9sExtension"] = ResourceMeta{
+		DAO:      &dao.I9sExtension{},
+		Renderer: &render.I9sExtension{},
+	}
 }

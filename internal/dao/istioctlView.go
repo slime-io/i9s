@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"github.com/derailed/k9s/internal"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/rs/zerolog/log"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -27,9 +28,9 @@ func (i IstioctlView) List(ctx context.Context, ns string) ([]runtime.Object, er
 		"istioctl x precheck",
 	}
 
-	parent, ok := ctx.Value("parent").(string)
+	parent, ok := ctx.Value(internal.Parent).(string)
 	if !ok {
-		log.Error().Msgf("Expecting a string but got %T", ctx.Value("parent"))
+		log.Error().Msgf("Expecting a string but got %T", ctx.Value(internal.Parent))
 		return oo, nil
 	}
 	for _, f := range command {

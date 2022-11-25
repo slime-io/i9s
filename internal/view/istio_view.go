@@ -2,6 +2,7 @@ package view
 
 import (
 	"context"
+	"github.com/derailed/k9s/internal"
 	"github.com/derailed/k9s/internal/client"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/derailed/k9s/internal/ui"
@@ -28,14 +29,18 @@ func NewIstio(gvr client.GVR) ResourceViewer {
 
 func (i *IstioView) chartContext(ctx context.Context) context.Context {
 	rev := i.GetTable().GetSelectedItem()
-	return context.WithValue(ctx, "parent", rev)
+	ctx = context.WithValue(ctx, internal.IstioRev, rev)
+	//ctx = context.WithValue(ctx, "env", i.GetTable().envFn())
+	ctx = context.WithValue(ctx, internal.ExtensionType, internal.IstioView)
+	ctx = context.WithValue(ctx, internal.Parent, rev)
+	return ctx
 }
 
 func (i *IstioView) bindKeys(aa ui.KeyActions) {
 	aa.Add(ui.KeyActions{
 		ui.KeyM: ui.NewKeyAction("Istio-Debug-View", i.istioDebugApi, true),
-		//ui.KeyB: ui.NewKeyAction("istio config", i.showIstioConfig, true),
 		ui.KeyN: ui.NewKeyAction("Istioctl-View", i.istioctlView, true),
+		ui.KeyV: ui.NewKeyAction("I9s-Extension", i.i9sExtension, true),
 	})
 }
 
@@ -71,6 +76,25 @@ func (i *IstioView) istioctlView(evt *tcell.EventKey) *tcell.EventKey {
 		return evt
 	}
 	iview := NewIstioctlView(client.NewGVR("istioctlView"))
+	iview.SetContextFn(i.chartContext)
+	if err := i.App().inject(iview); err != nil {
+		i.App().Flash().Err(err)
+		return evt
+	}
+	return nil
+}
+
+func (i *IstioView) i9sExtension(evt *tcell.EventKey) *tcell.EventKey {
+	sel := i.GetTable().GetSelectedItem()
+	log.Debug().Msgf("get sel %s in debug", sel)
+	if sel == "" {
+		return evt
+	}
+
+	env := i.GetTable().envFn()
+	log.Debug().Msgf("get env in isitoview %+v", env)
+
+	iview := NewI9sExtensionView(client.NewGVR("i9sExtension"))
 	iview.SetContextFn(i.chartContext)
 	if err := i.App().inject(iview); err != nil {
 		i.App().Flash().Err(err)

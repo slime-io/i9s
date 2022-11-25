@@ -2,6 +2,7 @@ package view
 
 import (
 	"context"
+	"github.com/derailed/k9s/internal"
 	"github.com/derailed/k9s/internal/client"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/derailed/k9s/internal/ui"
@@ -32,7 +33,7 @@ func NewIstioApiView(gvr client.GVR) ResourceViewer {
 func (i *IstioApiView) chartContext(ctx context.Context) context.Context {
 	// 112#istio/config_dump
 	//log.Info().Msgf("GetSelectedItem %s in IstioApiView.chartContext", i.GetTable().GetSelectedItem())
-	return context.WithValue(ctx, "parent", i.GetTable().GetSelectedItem())
+	return context.WithValue(ctx, internal.Parent, i.GetTable().GetSelectedItem())
 }
 
 func (i *IstioApiView) enter(app *App, model ui.Tabular, gvr, path string) {
@@ -57,7 +58,7 @@ func (i *IstioApiView) enter(app *App, model ui.Tabular, gvr, path string) {
 				i.App().Flash().Err(err)
 				return
 			}
-		} else if api == "configzEx"{
+		} else if api == "configzEx" {
 			configzView := NewIstioConfigzView(client.NewGVR("configz"))
 			configzView.SetContextFn(i.chartContext)
 			if err := i.App().inject(configzView); err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/derailed/k9s/internal"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
@@ -23,9 +24,9 @@ type IstioAdsz struct {
 func (i IstioAdsz) List(ctx context.Context, ns string) ([]runtime.Object, error) {
 	oo := make([]runtime.Object, 0)
 
-	parent, ok := ctx.Value("parent").(string)
+	parent, ok := ctx.Value(internal.Parent).(string)
 	if !ok {
-		log.Error().Msgf("Expecting a string but got %T", ctx.Value("parent"))
+		log.Error().Msgf("Expecting a string but got %T", ctx.Value(internal.Parent))
 		return oo, nil
 	}
 	rev, _ := parse(parent)
@@ -37,7 +38,7 @@ func (i IstioAdsz) List(ctx context.Context, ns string) ([]runtime.Object, error
 	instance2adsz := make(map[string]Adsz, 0)
 
 	for _, name := range names {
-		c := getAdsz(namespace,name)
+		c := getAdsz(namespace, name)
 		adsz := parseAdsz(c)
 		instance2adsz[name] = adsz
 	}
@@ -45,11 +46,11 @@ func (i IstioAdsz) List(ctx context.Context, ns string) ([]runtime.Object, error
 	for name, item := range instance2adsz {
 		for _, con := range item.Clients {
 			oo = append(oo, render.IstioAdszRes{
-				ConnectionId: con.ConnectionId,
-				ConnectedAt: con.ConnectedAt,
-				Address: con.Address,
+				ConnectionId:  con.ConnectionId,
+				ConnectedAt:   con.ConnectedAt,
+				Address:       con.Address,
 				IstioInstance: fmt.Sprintf("%s/%s", namespace, name),
-				Parent: strings.Join([]string{namespace, name}, "#") ,
+				Parent:        strings.Join([]string{namespace, name}, "#"),
 			})
 		}
 	}
@@ -57,16 +58,16 @@ func (i IstioAdsz) List(ctx context.Context, ns string) ([]runtime.Object, error
 }
 
 type Adsz struct {
-	TotalClients int32 `json:"totalClients"`
-	Clients []Client `json:"clients"`
+	TotalClients int32    `json:"totalClients"`
+	Clients      []Client `json:"clients"`
 }
 
 type Client struct {
-	ConnectionId string `json:"connectionId"`
-	ConnectedAt string `json:"connectedAt"`
-	Address string `json:"address"`
-	Metadata interface{} `json:"metadata"`
-	watches interface{} `json:"watches"`
+	ConnectionId string      `json:"connectionId"`
+	ConnectedAt  string      `json:"connectedAt"`
+	Address      string      `json:"address"`
+	Metadata     interface{} `json:"metadata"`
+	watches      interface{} `json:"watches"`
 }
 
 func getAdsz(namespace, name string) string {
@@ -110,4 +111,3 @@ func (i *IstioAdsz) getPilotNameNamespace(rev string) ([]string, string) {
 	}
 	return instance, instanceNs
 }
-

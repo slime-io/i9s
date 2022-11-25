@@ -97,4 +97,11 @@ func loadi9s(m ResourceMetas) {
 		Verbs:        []string{},
 		Categories:   []string{"k9s"},
 	}
+	m[client.NewGVR("i9sExtension")] = metav1.APIResource{
+		Name:         "i9sExtension",
+		Kind:         "i9sExtension",
+		SingularName: "i9sExtension",
+		Verbs:        []string{},
+		Categories:   []string{"k9s"},
+	}
 }
