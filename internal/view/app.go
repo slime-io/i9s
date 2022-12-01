@@ -85,6 +85,8 @@ func (a *App) Init(version string, rate int) error {
 	a.Content.Stack.AddListener(a.Crumbs())
 	a.Content.Stack.AddListener(a.Menu())
 
+	config.InitI9sExtension()
+
 	a.App.Init()
 	a.SetInputCapture(a.keyboard)
 	a.bindKeys()

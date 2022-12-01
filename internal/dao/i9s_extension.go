@@ -15,7 +15,7 @@ type I9sExtension struct {
 }
 
 // List
-func (i I9sExtension) List(ctx context.Context, ns string) ([]runtime.Object, error) {
+func (i *I9sExtension) List(ctx context.Context, ns string) ([]runtime.Object, error) {
 	oo := make([]runtime.Object, 0)
 
 	typ, ok := ctx.Value(internal.ExtensionType).(string)
@@ -39,12 +39,10 @@ func (i I9sExtension) List(ctx context.Context, ns string) ([]runtime.Object, er
 }
 
 func getCommand(typ string) []string {
-
 	var cmds []string
-
-	arr := config.ViewToExtension[typ]
-	for i, _ := range arr {
-		cmds = append(cmds, strings.Join(arr[i].Args, " "))
+	arr := config.GetViewToExtension()[typ]
+	for _, ext := range arr {
+		cmds = append(cmds, strings.Join(ext.Args, " "))
 	}
 	return cmds
 }
