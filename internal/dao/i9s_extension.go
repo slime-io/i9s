@@ -26,9 +26,9 @@ func (i *I9sExtension) List(ctx context.Context, ns string) ([]runtime.Object, e
 	log.Info().Msgf("get typ %s", typ)
 	command := getCommand(string(typ))
 	log.Info().Msgf("get command %+v", command)
-	parent, ok := ctx.Value(internal.IstioRev).(string)
+	parent, ok := ctx.Value(internal.Parent).(string)
 	if !ok {
-		log.Error().Msgf("want to get stirng extensionType, but get %T", ctx.Value(internal.IstioRev))
+		log.Error().Msgf("want to get stirng extensionType, but get %T", ctx.Value(internal.Parent))
 		return oo, nil
 	}
 

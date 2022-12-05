@@ -29,8 +29,6 @@ func NewIstio(gvr client.GVR) ResourceViewer {
 
 func (i *IstioView) chartContext(ctx context.Context) context.Context {
 	rev := i.GetTable().GetSelectedItem()
-	ctx = context.WithValue(ctx, internal.IstioRev, rev)
-	//ctx = context.WithValue(ctx, "env", i.GetTable().envFn())
 	ctx = context.WithValue(ctx, internal.ExtensionType, internal.IstioView)
 	ctx = context.WithValue(ctx, internal.Parent, rev)
 	return ctx

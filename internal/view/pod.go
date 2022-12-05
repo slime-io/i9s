@@ -130,7 +130,7 @@ func (p *Pod) showContainers(app *App, model ui.Tabular, gvr, path string) {
 
 func (p *Pod) coContext(ctx context.Context) context.Context {
 	ctx = context.WithValue(ctx, internal.KeyPath, p.GetTable().GetSelectedItem())
-	ctx = context.WithValue(ctx, internal.IstioRev, p.GetTable().GetSelectedItem())
+	ctx = context.WithValue(ctx, internal.Parent, p.GetTable().GetSelectedItem())
 	ctx = context.WithValue(ctx, internal.ExtensionType, internal.SidecarView)
 	return ctx
 }
