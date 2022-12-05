@@ -2,12 +2,17 @@ package view
 
 import (
 	"context"
+	"fmt"
 	"github.com/derailed/k9s/internal/client"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/derailed/k9s/internal/ui"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rs/zerolog/log"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"os/exec"
 	"strings"
 )
@@ -57,23 +62,28 @@ func (i *I9sExtensionView) enter(app *App, model ui.Tabular, gvr, path string) {
 }
 
 func (i *I9sExtensionView) fillEnv(env map[string]string) string {
-	// NAME:default#cmd reset --rev ${ISTIO_REV}
-	// NAME:details-v1-7d88846999-lz7ts#kubectl describe pods ${NAME} -n ${NAMESPACE}
+	// NAME:default#cmd reset --rev $ISTIO_REV
+	// NAME:details-v1-7d88846999-lz7ts#kubectl describe pods $NAME -n $NAMESPACE
+	// NAME:test#echo $ISTIO_REV
 	name := env["NAME"]
 	parts := strings.Split(name, "#")
 	if len(parts) != 2 {
 		return ""
 	}
-	env["ISTIO_REV"] = parts[0]
 	env["NAME"] = parts[0]
 
 	if env["NAMESPACE"] == "" {
+		// namespace is "" iew rev view
 		if ns := i.getDeploymentNs(parts[0]); ns != "" {
 			env["NAMESPACE"] = ns
-
 		}
+		env["ISTIO_REV"] = parts[0]
+	} else {
+		// other view
+		env["ISTIO_REV"] = i.getRev(env["NAME"], env["NAMESPACE"])
 	}
-	return parts[1]
+	cmd := parts[1]
+	return cmd
 }
 
 func (i *I9sExtensionView) getDeploymentNs(rev string) string {
@@ -93,6 +103,41 @@ func (i *I9sExtensionView) getDeploymentNs(rev string) string {
 
 	if len(dps.Items) > 0 {
 		return dps.Items[0].Namespace
+	}
+	return ""
+}
+
+func (i *I9sExtensionView) getRev(name, ns string) string {
+
+	po, err := i.App().factory.Get("v1/pods", fmt.Sprintf("%s/%s", ns, name), true, labels.Everything())
+	if err != nil {
+		log.Error().Msgf("get pods err, %s", "", err.Error())
+	}
+
+	pod := v1.Pod{}
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(po.(*unstructured.Unstructured).Object, &pod)
+	if err != nil {
+		log.Error().Msgf("Unstructured convert to pods err, %s", err.Error())
+	}
+
+	if rev, ok := pod.Labels[istioRev]; ok {
+		return rev
+	}
+
+	objectNs, err := i.App().factory.Get("v1/namespaces", fmt.Sprintf("%s/%s", "-", ns), true, labels.Everything())
+	if err != nil {
+		log.Error().Msgf("get ns err, %s", err.Error())
+		return ""
+	}
+
+	namespace := v1.Namespace{}
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(objectNs.(*unstructured.Unstructured).Object, &namespace)
+	if err != nil {
+		log.Error().Msgf("Unstructured convert to namespace err, %s", err.Error())
+	}
+
+	if rev, ok := namespace.Labels[istioRev]; ok {
+		return rev
 	}
 	return ""
 }

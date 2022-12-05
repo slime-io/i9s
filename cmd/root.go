@@ -26,8 +26,8 @@ var _ config.KubeSettings = (*client.Config)(nil)
 var (
 	version, commit, date = "dev", "dev", client.NA
 
-	k9sFlags              *config.Flags
-	k8sFlags              *genericclioptions.ConfigFlags
+	k9sFlags *config.Flags
+	k8sFlags *genericclioptions.ConfigFlags
 
 	rootCmd = &cobra.Command{
 		Use:   appName,
@@ -266,7 +266,7 @@ func initK8sFlags() {
 		k8sFlags.Namespace,
 		"namespace",
 		"n",
-		"default",
+		"istio-system",
 		"If present, the namespace scope for this CLI request",
 	)
 

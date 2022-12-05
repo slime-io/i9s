@@ -22,7 +22,7 @@ const (
 	AllNamespaces = ""
 
 	// DefaultNamespace designates the default namespace.
-	DefaultNamespace = "default"
+	DefaultNamespace = "istio-system"
 
 	// ClusterScope designates a resource is not namespaced.
 	ClusterScope = "-"
