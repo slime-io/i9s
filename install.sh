@@ -3,12 +3,16 @@ set -e
 
 export KUBECONFIG=${KUBECONFIG:-"$HOME/.kube/config"}
 
+# use can specify tag， like 'tag=v0.0.7-i9s ./install.sh'
+
 run() {
-  echo "docker run -it -d --net=host -v $KUBECONFIG:/root/.kube/config slimeio/i9s:v0.0.2"
-  containerID=$(docker run -it -d --net=host -v $KUBECONFIG:/root/.kube/config slimeio/i9s:v0.0.2)
+  tag=${tag:-$(curl https://api.github.com/repos/slime-io/i9s/releases/latest -s|grep tag_name|sed 's/.*tag_name": "//g; s/",.*//g')}
+  echo "docker run -it -d --net=host -v $KUBECONFIG:/root/.kube/config slimeio/i9s:$tag"
+  containerID=$(docker run -it -d --net=host -v $KUBECONFIG:/root/.kube/config slimeio/i9s:$tag)
   echo "$containerID"
   docker cp $containerID:/bin/i9s /tmp/i9s/
   docker cp $containerID:/bin/istioctl /tmp/i9s/
+  docker cp $containerID:/usr/local/bin/fx /tmp/fx
   docker kill $containerID
 }
 
@@ -60,14 +64,16 @@ pre_check() {
 }
 
 check() {
-  if ! has "i9s"; then
-    echo "download i9s..."
-    run
-    mv /tmp/i9s/i9s /usr/bin/
-    if ! has "istioctl"; then
-      echo "download istioctl..."
-      mv /tmp/i9s/istioctl /usr/bin
-    fi
+  echo "download i9s..."
+  run
+  mv /tmp/i9s/i9s /usr/bin/
+  if ! has "istioctl"; then
+  echo "download istioctl..."
+  mv /tmp/i9s/istioctl /usr/bin
+  fi
+  if ! has "fx"; then
+  echo "download fx..."
+  mv /tmp/i9s/fx /usr/bin
   fi
 }
 

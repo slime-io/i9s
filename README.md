@@ -68,8 +68,6 @@
 
 - `revision`查看，从`revision`视角提供注入规则、deployment资源清单、`mesh`配置文件等信息
 
-  
-
 
 ## 运行
 
@@ -84,10 +82,17 @@ tag=$(curl https://api.github.com/repos/slime-io/i9s/releases/latest -s|grep tag
 docker run -it --net=host -v $HOME/.kube/config:/root/.kube/config slimeio/i9s:$tag
 ```
 
-- 二进制方式, 该安装脚本会检查本地是否有`kubectl`, 如果没有需用户自行安装。之后会检查jq less 等命令是否存在，如果不存在会自动安装, 之后会运行镜像，并将镜像中的 i9s istioctl 可执行文件移动至 /usr/bin 目录下
+- 二进制方式, 该安装脚本会检查本地是否有`kubectl`, 如果没有需用户自行安装。之后会检查jq, less 等命令是否存在，如果不存在会自动安装, 之后会运行镜像，并将镜像中的可执行文件i9s, istioctl, fx移动至 /usr/bin 目录下
+
+默认情况下，会安装最新的tag
 ```
 sh ./install.sh
 ```
+或者用户可以指定需要安装的tag
+```
+tag=v0.0.7-i9s ./install.sh
+```
+
 如果没有拉取 `install.sh`, 可以执行下面命令在线安装最新版本的i9s
 ```
 tag=$(curl https://api.github.com/repos/slime-io/i9s/releases/latest -s|grep tag_name|sed 's/.*tag_name": "//g; s/",.*//g')
