@@ -3,6 +3,7 @@ package view
 import (
 	"context"
 	"fmt"
+	"github.com/derailed/k9s/internal"
 	"github.com/derailed/k9s/internal/client"
 	"github.com/derailed/k9s/internal/render"
 	"github.com/derailed/k9s/internal/ui"
@@ -19,11 +20,13 @@ import (
 
 type I9sExtensionView struct {
 	ResourceViewer
+	ParentView string
 }
 
-func NewI9sExtensionView(gvr client.GVR) ResourceViewer {
+func NewI9sExtensionView(gvr client.GVR, pp string) ResourceViewer {
 	c := I9sExtensionView{
 		ResourceViewer: NewBrowser(gvr),
+		ParentView:     pp,
 	}
 	c.GetTable().SetColorerFn(render.I9sExtension{}.ColorerFunc())
 	c.GetTable().SetBorderFocusColor(tcell.ColorMediumSpringGreen)
@@ -47,6 +50,7 @@ func (i *I9sExtensionView) enter(app *App, model ui.Tabular, gvr, path string) {
 
 	if err != nil {
 		log.Error().Err(err).Msg("Plugin Args match failed")
+		return
 	}
 	log.Info().Msgf("get cmd in i9s extension view:  %s", cmd)
 
@@ -65,23 +69,27 @@ func (i *I9sExtensionView) fillEnv(env map[string]string) string {
 	// NAME:default#cmd reset --rev $ISTIO_REV
 	// NAME:details-v1-7d88846999-lz7ts#kubectl describe pods $NAME -n $NAMESPACE
 	// NAME:test#echo $ISTIO_REV
+
 	name := env["NAME"]
 	parts := strings.Split(name, "#")
 	if len(parts) != 2 {
 		return ""
 	}
-	env["NAME"] = parts[0]
-
-	if env["NAMESPACE"] == "" {
-		// namespace is "" iew rev view
+	switch i.ParentView {
+	case internal.IstioView:
 		if ns := i.getDeploymentNs(parts[0]); ns != "" {
 			env["NAMESPACE"] = ns
 		}
+		env["NAME"] = parts[0]
 		env["ISTIO_REV"] = parts[0]
-	} else {
-		// other view
+	case "pods":
+		env["NAME"] = parts[0]
 		env["ISTIO_REV"] = i.getRev(env["NAME"], env["NAMESPACE"])
+	default:
+		env["NAME"] = parts[0]
 	}
+
+	log.Debug().Msgf("env is %+v in fillEnv", env)
 	cmd := parts[1]
 	return cmd
 }
@@ -90,7 +98,8 @@ func (i *I9sExtensionView) getDeploymentNs(rev string) string {
 
 	dial, err := i.App().factory.Client().Dial()
 	if err != nil {
-		log.Error().Msgf("get client err in view i9s_extension, %s", err)
+		log.Error().Msgf("get client err in getDeploymentNs, %s", err)
+		return ""
 	}
 	dps, err := dial.AppsV1().Deployments("").
 		List(context.TODO(), metav1.ListOptions{
@@ -111,17 +120,23 @@ func (i *I9sExtensionView) getRev(name, ns string) string {
 
 	po, err := i.App().factory.Get("v1/pods", fmt.Sprintf("%s/%s", ns, name), true, labels.Everything())
 	if err != nil {
-		log.Error().Msgf("get pods err, %s", "", err.Error())
+		log.Error().Msgf("get pods err, %s", err.Error())
+		return ""
 	}
 
 	pod := v1.Pod{}
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(po.(*unstructured.Unstructured).Object, &pod)
 	if err != nil {
 		log.Error().Msgf("Unstructured convert to pods err, %s", err.Error())
-	}
-
-	if rev, ok := pod.Labels[istioRev]; ok {
-		return rev
+		return ""
+	} else {
+		if !hasProxy(pod) {
+			log.Warn().Msgf("pods has no proxy, skip")
+			return ""
+		}
+		if rev, ok := pod.Labels[istioRev]; ok {
+			return rev
+		}
 	}
 
 	objectNs, err := i.App().factory.Get("v1/namespaces", fmt.Sprintf("%s/%s", "-", ns), true, labels.Everything())
@@ -134,10 +149,21 @@ func (i *I9sExtensionView) getRev(name, ns string) string {
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(objectNs.(*unstructured.Unstructured).Object, &namespace)
 	if err != nil {
 		log.Error().Msgf("Unstructured convert to namespace err, %s", err.Error())
+		return ""
+	} else {
+		if rev, ok := namespace.Labels[istioRev]; ok {
+			return rev
+		}
 	}
 
-	if rev, ok := namespace.Labels[istioRev]; ok {
-		return rev
-	}
 	return ""
+}
+
+func hasProxy(pod v1.Pod) bool {
+	for _, co := range pod.Status.ContainerStatuses {
+		if co.Name == "istio-proxy" || co.Name == "gateway-proxy" {
+			return true
+		}
+	}
+	return false
 }

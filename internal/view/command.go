@@ -234,8 +234,8 @@ func (c *Command) componentFor(gvr, path string, v *MetaViewer) ResourceViewer {
 	view.SetInstance(path)
 	if v.enterFn != nil {
 		view.GetTable().SetEnterFn(v.enterFn)
-	}
 
+	}
 	return view
 }
 

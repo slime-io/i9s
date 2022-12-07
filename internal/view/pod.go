@@ -76,7 +76,6 @@ func (p *Pod) bindKeys(aa ui.KeyActions) {
 		ui.KeyM: ui.NewKeyAction("Envoy-Debug-View", p.showProxyConfig, true),
 		ui.KeyN: ui.NewKeyAction("Istioctl-View", p.showProxyInfo, true),
 		ui.KeyB: ui.NewKeyAction("ProxyEx-View", p.showProxyInfoEx, true),
-		ui.KeyV: ui.NewKeyAction("I9s-Extension", p.i9sExtension, true),
 	})
 	aa.Add(ui.KeyActions{
 		ui.KeyF:      ui.NewKeyAction("Show PortForward", p.showPFCmd, true),
@@ -131,7 +130,6 @@ func (p *Pod) showContainers(app *App, model ui.Tabular, gvr, path string) {
 func (p *Pod) coContext(ctx context.Context) context.Context {
 	ctx = context.WithValue(ctx, internal.KeyPath, p.GetTable().GetSelectedItem())
 	ctx = context.WithValue(ctx, internal.Parent, p.GetTable().GetSelectedItem())
-	ctx = context.WithValue(ctx, internal.ExtensionType, internal.SidecarView)
 	return ctx
 }
 
