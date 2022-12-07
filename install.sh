@@ -12,7 +12,7 @@ run() {
   echo "$containerID"
   docker cp $containerID:/bin/i9s /tmp/i9s/
   docker cp $containerID:/bin/istioctl /tmp/i9s/
-  docker cp $containerID:/usr/local/bin/fx /tmp/fx
+  docker cp $containerID:/usr/local/bin/fx /tmp/i9s
   docker kill $containerID
 }
 
