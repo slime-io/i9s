@@ -119,28 +119,3 @@ func (p *Pod) containProxy() (bool, bool) {
 
 	return hasProxy, sidecar
 }
-
-func (p *Pod) i9sExtension(evt *tcell.EventKey) *tcell.EventKey {
-	sel := p.GetTable().GetSelectedItem()
-	log.Debug().Msgf("get sel %s in debug", sel)
-	if sel == "" {
-		return evt
-	}
-
-	has, _ := p.containProxy()
-	if !has {
-		log.Debug().Msgf("pod %s has no proxy, skip", sel)
-		return nil
-	}
-
-	env := p.GetTable().envFn()
-	log.Debug().Msgf("get env in pod_i9s %+v", env)
-
-	iview := NewI9sExtensionView(client.NewGVR("i9sExtension"))
-	iview.SetContextFn(p.coContext)
-	if err := p.App().inject(iview); err != nil {
-		p.App().Flash().Err(err)
-		return evt
-	}
-	return nil
-}

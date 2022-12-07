@@ -116,6 +116,7 @@ func (b *Browser) bindKeys(aa ui.KeyActions) {
 		tcell.KeyEscape: ui.NewSharedKeyAction("Filter Reset", b.resetCmd, false),
 		tcell.KeyEnter:  ui.NewSharedKeyAction("Filter", b.filterCmd, false),
 		tcell.KeyHelp:   ui.NewSharedKeyAction("Help", b.helpCmd, false),
+		tcell.KeyCtrlV:  ui.NewKeyAction("I9s-Extension", b.i9sExtension, true),
 	})
 }
 
@@ -551,4 +552,37 @@ func (b *Browser) resourceDelete(selections []string, msg string) {
 		}
 		b.refresh()
 	}, func() {})
+}
+
+func (b *Browser) i9sExtension(evt *tcell.EventKey) *tcell.EventKey {
+	sel := b.GetTable().GetSelectedItem()
+	log.Debug().Msgf("get sel %s in debug", sel)
+	if sel == "" {
+		return evt
+	}
+
+	env := b.GetTable().envFn()
+	rn := env["RESOURCE_NAME"]
+	log.Debug().Msgf("get env in browser %+v", env)
+
+	typ := ""
+	if rn == "istio" {
+		typ = internal.IstioView
+	} else {
+		typ = rn
+	}
+
+	iview := NewI9sExtensionView(client.NewGVR("i9sExtension"), typ)
+	iview.SetContextFn(func(ctx context.Context) context.Context {
+		ctx = b.defaultContext()
+		ctx = context.WithValue(ctx, internal.ExtensionType, typ)
+		ctx = context.WithValue(ctx, internal.Parent, sel)
+		ctx = context.WithValue(ctx, internal.KeyPath, sel)
+		return ctx
+	})
+	if err := b.App().inject(iview); err != nil {
+		b.App().Flash().Err(err)
+		return evt
+	}
+	return nil
 }
